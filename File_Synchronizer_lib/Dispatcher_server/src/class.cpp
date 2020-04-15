@@ -16,6 +16,10 @@ int return_new_pc_id() {
     return 0;
 }
 
+std::vector<std::string> ping_connection(std::vector<std::string> users_ip) {
+    return {};
+}
+
 int auth_try(std::string login, std::string password) {
     return 0;
 }

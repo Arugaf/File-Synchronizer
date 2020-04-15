@@ -11,6 +11,7 @@ class dispatcher_server_connections {
         std::vector<std::string> return_connections(int);
         int return_new_pc_id();
     private:
+        std::vector<std::string> ping_connection(std::vector<std::string>);
         int last_pc_id;
 };
 
