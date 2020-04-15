@@ -1,6 +1,8 @@
 #ifndef PROJECT_SOCKET_H
 #define PROJECT_SOCKET_H
 
+#include <string>
+
 class socket;
 
 class socket_controller {

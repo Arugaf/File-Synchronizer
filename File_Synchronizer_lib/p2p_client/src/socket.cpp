@@ -1,7 +1,5 @@
 #include "socket.h"
 
-class socket;
-
 socket_controller::socket_controller() {
 
 }
@@ -14,12 +12,13 @@ socket_controller::~socket_controller() {
 
 }
 
-int socket_controller::make_socket() {
+int socket_controller::make_socket(std::string) {
     return 1;
 }
 
 socket socket_controller::return_socket() {
-    return 1;
+    socket a;
+    return a;
 }
 
 int set_socket_ip(std::string) {

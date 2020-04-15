@@ -4,6 +4,7 @@
 #include "p2p_client.h"
 
 TEST(socket, make_socket_test) {
+
     ASSERT_NE(make_socket("192.168.0.0"), 0);
 }
 
