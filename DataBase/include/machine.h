@@ -1,7 +1,7 @@
-#ifndef UNTITLED9_MACHINE_H
-#define UNTITLED9_MACHINE_H
+#ifndef FILE_SYNCHRONIZER_MACHINE_H
+#define FILE_SYNCHRONIZER_MACHINE_H
 
-//в алфавитном порядке и в cpp файл реализацию
+
 #include <string>
 #include <vector>
 #include <map>
@@ -45,4 +45,4 @@ public:
 
 };
 
-#endif //UNTITLED9_MACHINE_H
+#endif //FILE_SYNCHRONIZER_MACHINE_H

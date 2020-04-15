@@ -1,9 +1,6 @@
-//
-// Created by Administrator on 10.04.2020.
-//
 
-#ifndef UNTITLED9_VERSIONMANAGER_H
-#define UNTITLED9_VERSIONMANAGER_H
+#ifndef FILE_SYNCHRONIZER_VERSIONMANAGER_H
+#define FILE_SYNCHRONIZER_VERSIONMANAGER_H
 
 #include <string>
 #include <vector>
@@ -35,4 +32,4 @@ public:
 
 };
 
-#endif //UNTITLED9_VERSIONMANAGER_H
+#endif //FILE_SYNCHRONIZER_VERSIONMANAGER_H

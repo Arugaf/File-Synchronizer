@@ -1,5 +1,5 @@
-#ifndef UNTITLED9_USER_H
-#define UNTITLED9_USER_H
+#ifndef FILE_SYNCHRONIZER_USER_H
+#define FILE_SYNCHRONIZER_USER_H
 
 #include <string>
 #include <vector>
@@ -58,4 +58,4 @@ public:
 
 };
 
-#endif //UNTITLED9_USER_H
+#endif //FILE_SYNCHRONIZER_USER_H

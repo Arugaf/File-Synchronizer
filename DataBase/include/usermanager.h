@@ -1,9 +1,7 @@
-//
-// Created by Administrator on 14.04.2020.
-//
 
-#ifndef UNTITLED9_USERMANAGER_H
-#define UNTITLED9_USERMANAGER_H
+
+#ifndef FILE_SYNCHRONIZER_USERMANAGER_H
+#define FILE_SYNCHRONIZER_USERMANAGER_H
 
 #include "user.h"
 
@@ -25,4 +23,4 @@ public:
     std::filesystem::path GetUserInfoByUsername(const std::string& user);
 };
 
-#endif //UNTITLED9_USERMANAGER_H
+#endif //FILE_SYNCHRONIZER_USERMANAGER_H

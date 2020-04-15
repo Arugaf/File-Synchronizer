@@ -2,8 +2,8 @@
 // Created by Administrator on 15.04.2020.
 //
 
-#ifndef UNTITLED9_DATABASE_H
-#define UNTITLED9_DATABASE_H
+#ifndef FILE_SYNCHRONIZER_DATABASE_H
+#define FILE_SYNCHRONIZER_DATABASE_H
 
 #include "user.h"
 #include "machine.h"
@@ -22,4 +22,4 @@ private:
     Machine machine;
 };
 
-#endif //UNTITLED9_DATABASE_H
+#endif //FILE_SYNCHRONIZER_DATABASE_H
