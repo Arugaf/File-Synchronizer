@@ -4,11 +4,13 @@ set(backend backend)
 set(backend_path ${PROJECT_SOURCE_DIR}/File_Synchronizer_lib/Backend)
 
 # Includes
-set(${backend}_lib_headers_dir ${path}/include)
+set(${backend}_lib_headers_dir ${backend_path}/include)
 
 # Sources
-set(${backend}_lib_sources_dir ${path}/src)
-set(${backend}_lib_sources)
+set(${backend}_lib_sources_dir ${backend_path}/src)
+set(${backend}_lib_sources ${${backend}_lib_sources_dir}/data_base_controller.cpp
+                           ${${backend}_lib_sources_dir}/synch_controller.cpp
+                           ${${backend}_lib_sources_dir}/local_data.cpp)
 
 # Library
 add_library(${project_name}_${backend}_lib STATIC ${${backend}_lib_sources})

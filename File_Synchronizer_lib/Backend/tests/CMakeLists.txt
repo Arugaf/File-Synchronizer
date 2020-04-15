@@ -1,8 +1,8 @@
 # Project
-set(tests_name)
+set(tests_name backend_tests)
 
 # Sources
-set(${backend}_tests_sources_dir ${path}/tests)
+set(${backend}_tests_sources_dir ${backend_path}/tests)
 set(${backend}_tests_sources ${${backend}_tests_sources_dir}/main.cpp)
 
 # Executables
