@@ -1,4 +1,4 @@
-set(tests_name)
+set(tests_name utils)
 
 set(${p2p_client}_tests_sources_dir ${path}/tests)
 set(${p2p_client}_tests_sources ${${p2p_client}_tests_sources_dir}/main.cpp)

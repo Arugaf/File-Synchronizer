@@ -13,13 +13,17 @@ public:
 
     ~socket_controller();
 
-    int make_socket();
+    int make_socket(std::string);
 
-    int return_socket();
+    socket return_socket();
+
+    int set_socket_ip(std::string);
 
 private:
 
     socket curr_socket;
+
+    std::string ip;
 };
 
 #endif //PROJECT_SOCKET_H
