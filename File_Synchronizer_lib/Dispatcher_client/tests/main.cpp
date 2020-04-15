@@ -45,6 +45,12 @@ TEST(DispatcherClient, LogoutTest) {
     sqlite3_close(db);
 }
 
+TEST(DispatcherClient, LogoutTest) {
+    int user_id = user_login("test", "test");
+    ASSERT_NE(return_connections(user_id).size, 0);
+    user_logout();
+}
+
 TEST(DispatcherClient, IpEstablishTest) {
     ASSERT_NE(establish_ip(), 0);
 }

@@ -2,6 +2,7 @@
 #define FILE_SYNCHRONIZER_CLASS_H
 
 #include <string>
+#include <vector>
 
 class dispatcher_client {
     public:
@@ -9,6 +10,7 @@ class dispatcher_client {
         int user_create(std::string, std::string);
         int user_edit(std::string, std::string);
         int user_logout();
+        std::vector<std::string> return_connections(int);
     private:
         std::string establish_ip();
         std::string crypt(std::string);

@@ -16,6 +16,10 @@ int user_logout() {
     return 0;
 }
 
+std::vector<std::string> return_connections(int user_id) {
+    return {};
+}
+
 std::string establish_ip() {
     return 0;
 }
