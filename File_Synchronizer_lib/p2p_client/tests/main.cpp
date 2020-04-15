@@ -32,3 +32,8 @@ TEST(p2p_client, ping_connection_test) {
 TEST(p2p_client, close_connection_test) {
     ASSERT_NE(close_connection(), 0);
 }
+
+int main(int argc, char **argv) {
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+}
