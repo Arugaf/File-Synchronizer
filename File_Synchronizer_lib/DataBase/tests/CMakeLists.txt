@@ -4,8 +4,9 @@ set(tests_name database_tests)
 # Sources
 set(${database}_tests_sources_dir ${database_path}/tests)
 set(${database}_tests_sources ${${database}_tests_sources_dir}/main.cpp
-                              ${${database}_tests_sources_dir}/machine_class_test.cpp
-                              ${${database}_tests_sources_dir}/transactionjournal_test.cpp)
+                              ${${database}_tests_sources_dir}/logger_test.cpp
+        )
+
 
 # Executables
 add_executable(${tests_name} ${${database}_tests_sources})
