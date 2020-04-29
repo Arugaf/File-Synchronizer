@@ -1,3 +1,4 @@
+cmake_minimum_required(VERSION 3.10)
 # Project
     # Все тесты тут
 set(tests_name DispatcherServer)
@@ -5,6 +6,7 @@ set(tests_name DispatcherServer)
 # Sources
 set(${Dispatcher_server}_tests_sources_dir ${path}/tests)
 set(${Dispatcher_server}_tests_sources ${${Dispatcher_server}_tests_sources_dir}/main.cpp)
+set(gtest_disable_pthreads OFF)
 
 # Executables
 add_executable(${tests_name} ${${Dispatcher_server}_tests_sources})

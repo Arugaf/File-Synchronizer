@@ -1,73 +1,78 @@
-#include "gtest/gtest.h"
-#include "sqlite3/sqlite3.h"
+#include <gtest/gtest.h>
 
 #include "class.h"
 
+TEST(DispatcherServer, AddUserTest) {
+    dispatcher_server_users user;
+    int id = user.add_user("1","1");
+    ASSERT_GT(id, 0);
+    dispatcher_database_wrapper wrapper("Database.db");
+    std::vector<std::string> columns = {"user_login", "user_password"};
+    std::vector<std::string> args = {"1", "1"};
+    std::vector<std::string> result = wrapper.db_select("users", "user_id", columns, args);
+    ASSERT_EQ(std::stoi(result.front()), id);
+    wrapper.db_delete("users", columns, args);
+}
+
+TEST(DispatcherServer, AuthTryTest) {
+    dispatcher_server_users user;
+    user.add_user("1","1");
+    int id = user.auth_try("1","1");
+    ASSERT_GT(id, 0);
+    dispatcher_database_wrapper wrapper("Database.db");
+    std::vector<std::string> columns = {"user_login", "user_password"};
+    std::vector<std::string> args = {"1", "1"};
+    std::vector<std::string> result = wrapper.db_select("users", "user_id", columns, args);
+    ASSERT_EQ(std::stoi(result.front()), id);
+    wrapper.db_delete("users", columns, args);
+}
+
+TEST(DispatcherServer, EditUserTest) {
+    dispatcher_server_users user;
+    int id = user.add_user("1","1");
+    user.edit_user(id, "2", "2");
+    int new_id = user.auth_try("2","2");
+    ASSERT_EQ(id, new_id);
+    dispatcher_database_wrapper wrapper("Database.db");
+    std::vector<std::string> columns = {"user_login", "user_password"};
+    std::vector<std::string> args = {"2", "2"};
+    wrapper.db_delete("users", columns, args);
+}
+
 TEST(DispatcherServer, NewConnectionTest) {
-    new_connection(-1, -1, "test");
-    sqlite3 *db = 0;
-    char *err = 0;
-    char* SQL = "SELECT user_ip FROM FS_ACTIVE_USERS WHERE user_id = '-1';";
-    ASSERT_STREQ(sqlite3_open("database.dblite", &db), "SQLITE_OK");
-    ASSERT_STREQ(sqlite3_exec(db, SQL, 0, 0, &err), "test");
-    sqlite3_close(db);
-    disconnect(-1, -1);
+    dispatcher_server_connections connections("80");
+    int result = connections.new_connection(0, 1, "localhost");
+    result += connections.new_connection(0, 2, "localhost");
+    result += connections.new_connection(0, 3, "localhost");
+    ASSERT_EQ(result, 0);
+    dispatcher_database_wrapper wrapper("Database.db");
+    std::vector<std::string> columns = {"connection_user_id"};
+    std::vector<std::string> args = {"0"};
+    std::vector<std::string> fetch = wrapper.db_select("connections", "connection_id", columns, args);
+    ASSERT_EQ(fetch.size(), 3);
+    wrapper.db_delete("connections", columns, args);
 }
 
 TEST(DispatcherServer, DisconnectTest) {
-    new_connection(-1, -1, "test");
-    disconnect(-1, -1);
-    sqlite3 *db = 0;
-    char *err = 0;
-    char* SQL = "SELECT user_ip FROM FS_ACTIVE_USERS WHERE user_id = '-1';";
-    ASSERT_STREQ(sqlite3_open("database.dblite", &db), "SQLITE_OK");
-    ASSERT_STREQ(sqlite3_exec(db, SQL, 0, 0, &err), "SQLITE_DONE");
-    sqlite3_close(db);
+    dispatcher_server_connections connections("80");
+    connections.new_connection(0, 1, "localhost");
+    connections.new_connection(0, 2, "localhost");
+    connections.new_connection(0, 3, "localhost");
+    connections.disconnect(0, 3);
+    dispatcher_database_wrapper wrapper("Database.db");
+    std::vector<std::string> columns = {"connection_user_id"};
+    std::vector<std::string> args = {"0"};
+    std::vector<std::string> fetch = wrapper.db_select("connections", "connection_id", columns, args);
+    ASSERT_EQ(fetch.size(), 2);
+    wrapper.db_delete("connections", columns, args);
 }
 
-TEST(DispatcherServer, ReturnConnectionsTest) {
-    new_connection(-1, -1, "test");
-    ASSERT_STREQ(return_connections(-1).back, "test");
-    disconnect(-1, -1);
+TEST(DispatcherServer, PcIdDispenserTest) {
+    dispatcher_pc_id_dispenser dispenser;
+    dispatcher_database_wrapper wrapper("Database.db");
+    std::vector<std::string> fetch = wrapper.db_select("connections", "connection_pc_id");
+    ASSERT_EQ(std::stoi(fetch.back()), dispenser.return_new_pc_id() - 1);
 }
-
-TEST(DispatcherServer, NewPcIdTest) {
-    int new_pc_id = return_new_pc_id();
-    ASSERT_EQ(new_pc_id, last_pc_id);
-}
-
-TEST(DispatcherServer, CreateUserTest) {
-    add_user("test", "test");
-    sqlite3 *db = 0;
-    char *err = 0;
-    char* SQL = "SELECT user_id FROM FS_USERS WHERE login='test' AND password='test';"
-    ASSERT_STREQ(sqlite3_open("database.dblite", &db), "SQLITE_OK");
-    ASSERT_STRNE(sqlite3_exec(db, SQL, 0, 0, &err), "SQLITE_DONE");
-    sqlite3_close(db);
-}
-
-TEST(DispatcherServer, AuthTest) {
-    int user_id = auth_try("test", "test");
-    sqlite3 *db = 0;
-    char *err = 0;
-    char* SQL = "SELECT user_id FROM FS_USERS WHERE login='test' AND password='test';"
-    ASSERT_STREQ(sqlite3_open("database.dblite", &db), "SQLITE_OK");
-    ASSERT_EQ(atoi(sqlite3_exec(db, SQL, 0, 0, &err)), user_id);
-    sqlite3_close(db);
-}
-
-TEST(DispatcherClient, EditUserTest) {
-    edit_user(-1, "test2", "test2");
-    sqlite3 *db = 0;
-    char *err = 0;
-    char* SQL = "SELECT user_id FROM FS_USERS WHERE login='test2' AND password='test2';"
-    ASSERT_STREQ(sqlite3_open("database.dblite", &db), "SQLITE_OK");
-    ASSERT_EQ(atoi(sqlite3_exec(db, SQL, 0, 0, &err)), -1);
-    char* deleting = "DELETE FROM FS_USERS where user_id = '-1'";
-    sqlite3_exec(db, deleting, 0, 0, &err);
-    sqlite3_close(db);
-}
-
 
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
