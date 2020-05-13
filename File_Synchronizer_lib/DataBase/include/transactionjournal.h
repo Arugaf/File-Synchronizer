@@ -12,9 +12,6 @@ public:
     virtual void DeleteTransaction() = 0;
     virtual void Clear() = 0;
     virtual int GetJournalSize() = 0;
-    virtual Transaction GetLastTransaction() {
-        return Transaction();
-    }
     virtual void FixJournal(){};
 };
 

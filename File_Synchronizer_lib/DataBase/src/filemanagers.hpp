@@ -13,13 +13,13 @@
 template <typename T>
 class IFileManager {
 private:
-    void PrintInFile(T object, const std::filesystem::path& sourcefile) {
-        std::ofstream file(sourcefile);
-        if (file.is_open()) {
-            object.Print(file);
-        }
-        file.close();
-    }
+/*    void PrintInFile(T object, const std::filesystem::path& sourcefile) {
+            std::ofstream file(sourcefile);
+            if (file.is_open()) {
+                object.Print(file);
+            }
+            file.close();
+    }*/
 public:
     virtual ~IFileManager() = default;
 
@@ -27,7 +27,11 @@ public:
         try {
             std::filesystem::create_directories(source);
 
-            PrintInFile(object, source);
+            std::ofstream file(source);
+            if (file.is_open()) {
+                object.Print(file);
+            }
+            file.close();
 
         } catch (std::filesystem::filesystem_error& exception) {
             throw exception;
@@ -46,7 +50,11 @@ public:
 
     virtual void Update(T object, const std::filesystem::path& source) {
         try {
-            PrintInFile(object, source);
+            std::ofstream file(source);
+            if (file.is_open()) {
+                object.Print(file);
+            }
+            file.close();
 
         } catch (std::filesystem::filesystem_error& exception) {
             throw exception;
@@ -167,7 +175,7 @@ class MachineInfoFileManager : public IFileManager<Machine> {
 private:
     std::filesystem::path machineinfoPath;
 public:
-    explicit MachineInfoFileManager(const std::filesystem::path& source): {
+    explicit MachineInfoFileManager(const std::filesystem::path& source) {
         SetMachineinfoPath(source);
     };
     ~MachineInfoFileManager() override = default;
@@ -306,15 +314,12 @@ File FileInfoFilemanager::GetFileByFilename(const std::string &filename) {
     std::string path = filename + ".txt";
     std::string name;
     std::string source;
-    std::string blacklist;
 
     try {
         std::ifstream fileinfo(fileinfoPath / path);
         if (fileinfo.is_open()) {
             std::getline(fileinfo, name);
             std::getline(fileinfo, source);
-            std::getline(fileinfo, blacklist);
-
         }
         fileinfo.close();
 
@@ -323,12 +328,7 @@ File FileInfoFilemanager::GetFileByFilename(const std::string &filename) {
         msg << exception.what() << std::endl;
     }
 
-    File file(name, source);
-    if (std::stoi(blacklist)) {
-        file.AddFileToBlacklist();
-    }
-
-    return file;
+    return File(name, source);
 }
 
 // ----------------------------------------------------------------------------------

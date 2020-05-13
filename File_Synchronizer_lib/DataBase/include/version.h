@@ -5,16 +5,16 @@
 
 class Version {
 private:
-    int id;
-    File target;
+    std::filesystem::path targetFilepath;
     std::string hash;
 public:
+    Version() = default;
+    Version(std::filesystem::path _target, std::string _hash): targetFilepath(std::move(_target)),
+                                                               hash(std::move(_hash)) {};
     virtual ~Version() = default;
 
-    void SetId(const int& version_id);
-    int GetId();
-    void SetTarget(const File& file);
-    File GetTarget();
+    void SetTarget(File file);
+    std::filesystem::path GetTarget();
     void SetHash(const std::string& _filename);
     std::string GetFilename();
 };

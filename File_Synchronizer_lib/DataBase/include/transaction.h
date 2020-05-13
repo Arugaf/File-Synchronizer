@@ -43,4 +43,5 @@ public:
     void Print(std::ostream &out);
 };
 
+
 #endif //FILE_SYNCHRONIZER_TRANSACTION_H

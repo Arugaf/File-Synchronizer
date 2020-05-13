@@ -1,19 +1,11 @@
 #include "version.h"
 
-void Version::SetId(const int &version_id) {
-    id = version_id;
+void Version::SetTarget(File file) {
+    targetFilepath = file.GetFilepath();
 }
 
-int Version::GetId() {
-    return id;
-}
-
-void Version::SetTarget(const File &file) {
-    target = file;
-}
-
-File Version::GetTarget() {
-    return target;
+std::filesystem::path Version::GetTarget() {
+    return targetFilepath;
 }
 
 void Version::SetHash(const std::string &_hash) {
@@ -23,3 +15,4 @@ void Version::SetHash(const std::string &_hash) {
 std::string Version::GetFilename() {
     return hash;
 }
+

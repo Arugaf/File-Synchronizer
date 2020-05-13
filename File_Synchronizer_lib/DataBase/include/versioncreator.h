@@ -4,18 +4,20 @@
 #include "file.h"
 #include "version.h"
 
-class IVersionCreator {
+class VersionCreator{
+private:
+    std::string ComputeHashSum(const std::filesystem::path& targetSource);
 public:
-    virtual void AddToIndex() {};
-    virtual void CreateDiff() {};
+    virtual ~VersionCreator() = default;
+
+    std::filesystem::path AddToIndex(File file, const std::filesystem::path& versionsDirectory);
+    std::filesystem::path CreateDiff(File file, const std::filesystem::path& versionsDirectory);
 };
 
-class VersionCreator : public IVersionCreator {
-private:
-    std::string ComputeMD5();
-public:
-    void AddToIndex(File file, const std::filesystem::path& versionsDirectory);
-    void CreateDiff(File file);
-};
+#include <vector>
+#include <functional>
+#include <fstream>
+
+#include "versioncreator.h"
 
 #endif //FILE_SYNCHRONIZER_VERSIONCREATOR_H
