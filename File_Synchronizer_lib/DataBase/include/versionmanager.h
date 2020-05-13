@@ -3,27 +3,26 @@
 
 #include <stack>
 #include <filesystem>
-namespace fs = std::filesystem;
 
 #include "version.h"
-#include "logger.h"
+#include "transactionjournal.h"
 #include "versioncreator.h"
 
 class VersionManager {
 private:
-    fs::path versions_path;
+    std::filesystem::path versionsPath;
     std::stack<Version> history;
-    ILogger* logger;
-    IVersionCreator* version_creator;
+    ITransactionJournal* logger;
+    IVersionCreator* versionCreator;
 public:
-    VersionManager(): logger(new Logger()), version_creator(new VersionCreator()) {};
-    VersionManager(ILogger* _logger, IVersionCreator* _version_creator) {
+    VersionManager(): logger(new TransactionJournal()), versionCreator(new VersionCreator()) {};
+    VersionManager(ITransactionJournal* _logger, IVersionCreator* _versionCreator) {
         logger = _logger;
-        version_creator = _version_creator;
+        versionCreator = _versionCreator;
     };
 
-    void set_versions_path(const fs::path& source);
-    fs::path get_versions_path();
+    void SetVersionsPath(const std::filesystem::path& source);
+    std::filesystem::path GetVersionsPath();
     void CreateVersion();
     void DeleteVersion(const Version&);
     std::stack<Version> GetVersionHistoryForFile(const std::string& filename);

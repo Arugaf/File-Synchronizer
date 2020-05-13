@@ -1,29 +1,43 @@
 #include "machine.h"
 
-void Machine::set_id(const int &id_machine) {
-
+void Machine::SetId(const int &id_machine) {
+    id = id_machine;
 }
-
-int Machine::get_id() {
-    return 0;
+int Machine::GetId() {
+    return id;
 }
 
 std::vector<File> Machine::GetSyncFilesListForMachine() {
-    return std::vector<File>();
+    return syncFiles;
 }
 
 int Machine::GetCountSyncFilesForMachine() {
-    return 0;
+    return syncFiles.size();
 }
 
 void Machine::AddFileForSync(const File &file) {
-
+    syncFiles.push_back(file);
 }
 
 void Machine::DeleteFileForSync(const File &file) {
-
+    syncFiles.erase(std::remove(syncFiles.begin(), syncFiles.end(), file), syncFiles.end());
 }
 
 void Machine::ClearSyncFiles() {
-
+    syncFiles.clear();
 }
+
+void Machine::Print(std::ostream &out) {
+    std::string info;
+
+    info = std::to_string(id) + "\n";
+
+    for (auto item : syncFiles) {
+        info += item.GetFilepath().string();
+        info += " ";
+    }
+
+    out << info;
+}
+
+// что то сделать с syncList, getMachineFromFileinfo()

@@ -1,25 +1,25 @@
 #include "version.h"
 
-void Version::set_id(const int &version_id) {
-
+void Version::SetId(const int &version_id) {
+    id = version_id;
 }
 
-int Version::get_id() {
-    return 0;
+int Version::GetId() {
+    return id;
 }
 
-void Version::set_target(const File &file) {
-
+void Version::SetTarget(const File &file) {
+    target = file;
 }
 
-File Version::get_target() {
-    return File();
+File Version::GetTarget() {
+    return target;
 }
 
-void Version::set_version_filename(const std::string &filename) {
-
+void Version::SetHash(const std::string &_hash) {
+    hash = _hash;
 }
 
-std::string Version::get_version_filename() {
-    return std::string();
+std::string Version::GetFilename() {
+    return hash;
 }

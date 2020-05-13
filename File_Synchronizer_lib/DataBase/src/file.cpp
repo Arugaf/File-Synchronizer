@@ -1,30 +1,41 @@
 #include "file.h"
 
-void File::set_filename(const std::string &name) {
-
+void File::SetFilename(const std::string &name) {
+    filename = name;
 }
 
-std::string File::get_filename() {
-    return std::string();
+std::string File::GetFilename() {
+    return filename;
 }
 
-void File::set_file_path(const fs::path &source) {
-
+void File::SetFilepath(const std::filesystem::path &source) {
+    filepath = source;
 }
 
-fs::path File::get_file_path() {
-    return fs::path();
+std::filesystem::path File::GetFilepath() {
+    return filepath;
 }
 
 bool File::IsInBlacklist() {
-    return false;
+    return blacklist;
 }
 
 void File::AddFileToBlacklist() {
-
+    blacklist = true;
 }
 
 void File::DeleteFileFromBlacklist() {
-
+    blacklist = false;
 }
+
+void File::Print(std::ostream &out) {
+    std::string info;
+
+    info =  filename + "\n"
+            + filepath.string() + "\n"
+            + std::to_string(blacklist);
+
+    out << info;
+}
+
 

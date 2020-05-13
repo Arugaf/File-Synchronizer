@@ -5,7 +5,7 @@ project(${project_name})
 set(database_path ${PROJECT_SOURCE_DIR})
 
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wpedantic -Werror")
+#set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wpedantic -Werror")
 
 add_subdirectory(googletest)
 add_subdirectory(${project_name}_lib)

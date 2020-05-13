@@ -17,9 +17,7 @@ set(${database}_lib_sources ${${database}_lib_sources_dir}/file.cpp
                             ${${database}_lib_sources_dir}/version.cpp
                             ${${database}_lib_sources_dir}/versioncreator.cpp
                             ${${database}_lib_sources_dir}/versionmanager.cpp
-                            ${${database}_lib_sources_dir}/user_info_filemanager.cpp
-                            ${${database}_lib_sources_dir}/machine_info_filemanager.cpp
-                            ${${database}_lib_sources_dir}/file_info_filemanager.cpp
+                            ${${database}_lib_sources_dir}/filemanagers.hpp
                             ${${database}_lib_sources_dir}/database.cpp
         )
 

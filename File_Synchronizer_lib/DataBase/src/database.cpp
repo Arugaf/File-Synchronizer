@@ -1,49 +1,38 @@
 #include "database.h"
 
-void Database::set_db_path(const fs::path &source) {
+void Database::SetDbPath(const std::filesystem::path &source) {
 
 }
-
-fs::path Database::get_db_path() {
-    return fs::path();
+std::filesystem::path Database::GetDbPath() {
+  return std::filesystem::path();
 }
-
-fs::path Database::GetFileInfofile(const std::string &filename) {
-    return fs::path();
+std::filesystem::path Database::GetFileInfofile(const std::string &filename) {
+  return std::filesystem::path();
 }
-
-fs::path Database::GetFileInfofile() {
-    return fs::path();
+std::filesystem::path Database::GetFileInfofile() {
+  return std::filesystem::path();
 }
-
-fs::path Database::GetUserInfofile(const std::string &username) {
-    return fs::path();
+std::filesystem::path Database::GetUserInfofile(const std::string &username) {
+  return std::filesystem::path();
 }
-
-fs::path Database::GetUserInfofile() {
-    return fs::path();
+std::filesystem::path Database::GetUserInfofile() {
+  return std::filesystem::path();
 }
-
-fs::path Database::GetJournal() {
-    return fs::path();
+std::filesystem::path Database::GetJournal() {
+  return std::filesystem::path();
 }
-
-fs::path Database::GetVersions() {
-    return fs::path();
+std::filesystem::path Database::GetVersions() {
+  return std::filesystem::path();
 }
-
-fs::path Database::GetAllVersionsForFile(const std::string &filename) {
-    return fs::path();
+std::filesystem::path Database::GetAllVersionsForFile(const std::string &filename) {
+  return std::filesystem::path();
 }
-
-fs::path Database::GetLastVersionForFile(const std::string &filename) {
-    return fs::path();
+std::filesystem::path Database::GetLastVersionForFile(const std::string &filename) {
+  return std::filesystem::path();
 }
-
-fs::path Database::GetMachineInfofile() {
-    return fs::path();
+std::filesystem::path Database::GetMachineInfofile() {
+  return std::filesystem::path();
 }
-
-fs::path Database::GetDB() {
-    return fs::path();
+std::filesystem::path Database::GetDB() {
+  return std::filesystem::path();
 }

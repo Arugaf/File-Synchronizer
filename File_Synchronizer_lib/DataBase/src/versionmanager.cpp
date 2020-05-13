@@ -1,11 +1,11 @@
 #include "versionmanager.h"
 
-void VersionManager::set_versions_path(const fs::path &source) {
-
+void VersionManager::SetVersionsPath(const std::filesystem::path& source) {
+    versionsPath = source;
 }
 
-fs::path VersionManager::get_versions_path() {
-    return fs::path();
+std::filesystem::path VersionManager::GetVersionsPath() {
+    return versionsPath;
 }
 
 void VersionManager::CreateVersion() {

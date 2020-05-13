@@ -6,13 +6,16 @@
 
 class IVersionCreator {
 public:
-    virtual void AddToIndex(const File&) = 0;
-    virtual void CreateDiff(const File&) = 0;
+    virtual void AddToIndex() {};
+    virtual void CreateDiff() {};
 };
 
 class VersionCreator : public IVersionCreator {
-    void AddToIndex(const File& file) override;
-    void CreateDiff(const File& file) override;
+private:
+    std::string ComputeMD5();
+public:
+    void AddToIndex(File file, const std::filesystem::path& versionsDirectory);
+    void CreateDiff(File file);
 };
 
 #endif //FILE_SYNCHRONIZER_VERSIONCREATOR_H

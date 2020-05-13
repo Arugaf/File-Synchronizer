@@ -8,15 +8,23 @@
 class Machine {
 private:
     int id;
-    std::vector<File> sync_files;
+    std::vector<File> syncFiles;
 public:
-    void set_id(const int& id_machine);
-    int get_id();
+    virtual ~Machine() = default;
+
+    void SetId(const int& id_machine);
+    int GetId();
     std::vector<File> GetSyncFilesListForMachine();
     int GetCountSyncFilesForMachine();
     void AddFileForSync(const File& file);
     void DeleteFileForSync(const File& file);
     void ClearSyncFiles();
+
+    void Print(std::ostream &out);
+
+    bool operator==(const Machine& right) {
+        return this->id == right.id;
+    }
 };
 
 

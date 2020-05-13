@@ -6,15 +6,17 @@
 class Version {
 private:
     int id;
-    File *target;
-    std::string version_filename;
+    File target;
+    std::string hash;
 public:
-    void set_id(const int& version_id);
-    int get_id();
-    void set_target(const File& file);
-    File get_target();
-    void set_version_filename(const std::string& filename);
-    std::string get_version_filename();
+    virtual ~Version() = default;
+
+    void SetId(const int& version_id);
+    int GetId();
+    void SetTarget(const File& file);
+    File GetTarget();
+    void SetHash(const std::string& _filename);
+    std::string GetFilename();
 };
 
 

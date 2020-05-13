@@ -3,21 +3,34 @@
 
 #include <filesystem>
 #include <string>
-namespace fs = std::filesystem;
+#include <utility>
 
 class File {
 private:
     std::string filename;
-    fs::path file_path;
+    std::filesystem::path filepath;
     bool blacklist;
 public:
-    void set_filename(const std::string& name);
-    std::string get_filename();
-    void set_file_path(const fs::path& source);
-    fs::path get_file_path();
+    File(std::string name, std::filesystem::path source): filename(std::move(name)), filepath(std::move(source)),
+                                                          blacklist(false) {};
+    File(std::string name, std::filesystem::path source, const bool& ignore): filename(std::move(name)),
+                                                                              filepath(std::move(source)),
+                                                                              blacklist(ignore) {};
+    virtual ~File() = default;
+
+    void SetFilename(const std::string& name);
+    std::string GetFilename();
+    void SetFilepath(const std::filesystem::path& source);
+    std::filesystem::path GetFilepath();
     bool IsInBlacklist();
     void AddFileToBlacklist();
     void DeleteFileFromBlacklist();
+
+    void Print(std::ostream &out);
+
+    bool operator==(const File& right) {
+        return this->filepath == right.filepath;
+    }
 };
 
 #endif //FILE_SYNCHRONIZER_FILE_H
