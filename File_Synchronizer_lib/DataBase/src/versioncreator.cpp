@@ -1,10 +1,11 @@
 #include <vector>
 #include <functional>
 #include <fstream>
+#include <iostream>
 
 #include "versioncreator.h"
 
-std::string VersionCreator::ComputeHashSum(const std::filesystem::path& targetSource) {
+std::string VersionCreator::SimpleHashSum(const std::filesystem::path& targetSource) {
     std::string element;
     size_t hash = 1;
 
@@ -22,18 +23,17 @@ std::string VersionCreator::ComputeHashSum(const std::filesystem::path& targetSo
     return std::to_string(hash);
 }
 
-std::filesystem::path VersionCreator::AddToIndex(File file, const std::filesystem::path& versionsDirectory) {
+std::filesystem::path VersionCreator::AddToIndex(const std::filesystem::path& sourceFilePath, const std::filesystem::path& versionsDirectory) {
     try {
-        std::string indexName = "index" + file.GetFilepath().extension().string();
+        std::string indexName = "index" + sourceFilePath.extension().string();
 
-        std::filesystem::path source = file.GetFilepath();
-        std::filesystem::path index = versionsDirectory / file.GetFilename() / indexName;
+        std::filesystem::path index = versionsDirectory / sourceFilePath.stem() / indexName;
 
-        if (!std::filesystem::exists(index)) {
-            std::filesystem::create_directories(index);
+        if (!std::filesystem::exists(index.parent_path())) {
+            std::filesystem::create_directories(index.parent_path());
         }
 
-        std::filesystem::copy_file(source, index, std::filesystem::copy_options::overwrite_existing);
+        std::filesystem::copy_file(sourceFilePath, index, std::filesystem::copy_options::overwrite_existing);
 
         return index;
 
@@ -43,24 +43,24 @@ std::filesystem::path VersionCreator::AddToIndex(File file, const std::filesyste
     }
 }
 
-std::filesystem::path VersionCreator::CreateDiff(File file, const std::filesystem::path& versionsDirectory) {
+std::filesystem::path VersionCreator::CreateDiff(const std::filesystem::path& sourceFilePath, const std::filesystem::path& versionsDirectory) {
     // A - исходный файл по GetFilepath
     // B - последний индекс по пути <versionsDirectory>/<GetFilename>/index.[exp]
-    //std::string indexName = "index" + file.GetFilepath().extension().string();
-
+    //std::string indexName = "index" + sourceFilepath().extension().string();
     //std::filesystem::path A = file.GetFilepath();
     //std::filesystem::path B = versionsDirectory / file.GetFilename() / indexName;
 
     // ВЕРСИИ СОЗДАЮТСЯ КОПИРОВАНИЕМ ФАЙЛА
+    // работает не только для .txt
 
-    std::filesystem::path source = file.GetFilepath();
-    std::filesystem::path version = versionsDirectory / file.GetFilename() / ComputeHashSum(file.GetFilepath());
+    std::string version = computeHash(sourceFilePath) + sourceFilePath.extension().string();
+    std::filesystem::path versionPath = versionsDirectory / sourceFilePath.stem() / version ;
 
-    if (!std::filesystem::exists(version)) {
-        std::filesystem::create_directories(version);
+    if (!std::filesystem::exists(versionPath.parent_path())) {
+        std::filesystem::create_directories(versionPath.parent_path());
     }
 
-    std::filesystem::copy_file(source, version, std::filesystem::copy_options::update_existing);
+    std::filesystem::copy_file(sourceFilePath, versionPath, std::filesystem::copy_options::update_existing);
 
-    return version;
+    return versionPath;
 }

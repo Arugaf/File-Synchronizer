@@ -8,7 +8,7 @@ std::string User::GetUsername() {
     return username;
 }
 
-std::vector<int> User::GetConnectedMachines() {
+std::unordered_set<int> User::GetConnectedMachines() {
     return connectedMachines;
 }
 
@@ -17,21 +17,19 @@ int User::GetCountConnectedMachines() {
 }
 
 void User::AddConnectedMachine(Machine machine) {
-    connectedMachines.push_back(machine.GetId());
+    connectedMachines.insert(machine.GetId());
 }
 
 void User::AddConnectedMachine(const int &machine) {
-    connectedMachines.push_back(machine);
+    connectedMachines.insert(machine);
 }
 
 void User::DeleteConnectedMachine(Machine machine) {
-    connectedMachines.erase(std::remove(connectedMachines.begin(),
-                            connectedMachines.end(), machine.GetId()), connectedMachines.end());
+    connectedMachines.erase(machine.GetId());
 }
 
 void User::DeleteConnectedMachine(const int &machine) {
-    connectedMachines.erase(std::remove(connectedMachines.begin(),
-                                        connectedMachines.end(), machine), connectedMachines.end());
+    connectedMachines.erase(machine);
 }
 
 

@@ -7,7 +7,7 @@ int Machine::GetId() {
     return id;
 }
 
-std::vector<File> Machine::GetSyncFilesListForMachine() {
+std::unordered_set<std::filesystem::path, std::hash<std::string>> Machine::GetSyncFilesListForMachine() {
     return syncFiles;
 }
 
@@ -15,12 +15,20 @@ int Machine::GetCountSyncFilesForMachine() {
     return syncFiles.size();
 }
 
-void Machine::AddFileForSync(const File &file) {
-    syncFiles.push_back(file);
+void Machine::AddFileForSync(File file) {
+    syncFiles.insert(file.GetFilepath());
 }
 
-void Machine::DeleteFileForSync(const File &file) {
-    syncFiles.erase(std::remove(syncFiles.begin(), syncFiles.end(), file), syncFiles.end());
+void Machine::AddFileForSync(const std::filesystem::path &file) {
+    syncFiles.insert(file);
+}
+
+void Machine::DeleteFileForSync(File file) {
+    syncFiles.erase(file.GetFilepath());
+}
+
+void Machine::DeleteFileForSync(const std::filesystem::path &file) {
+    syncFiles.erase(file);
 }
 
 void Machine::ClearSyncFiles() {
@@ -33,11 +41,11 @@ void Machine::Print(std::ostream &out) {
     info = std::to_string(id) + "\n";
 
     for (auto item : syncFiles) {
-        info += item.GetFilepath().string();
+        info += item.string();
         info += " ";
     }
 
     out << info;
 }
 
-// что то сделать с syncList, getMachineFromFileinfo()
+

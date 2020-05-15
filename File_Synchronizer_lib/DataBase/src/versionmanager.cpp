@@ -8,9 +8,9 @@ std::filesystem::path VersionManager::GetVersionsPath() {
     return versionsPath;
 }
 
-void VersionManager::CreateVersion(const File& file) {
-    std::filesystem::path versionPath =  versionCreator->CreateDiff(file, versionsPath);
-    std::filesystem::path index = versionCreator->AddToIndex(file, versionsPath);
+void VersionManager::CreateVersion(File file) {
+    std::filesystem::path versionPath =  versionCreator->CreateDiff(file.GetFilepath(), versionsPath);
+    std::filesystem::path index = versionCreator->AddToIndex(file.GetFilepath(), versionsPath);
 
     history.push_back(versionPath);
 

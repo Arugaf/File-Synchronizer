@@ -7,7 +7,7 @@
 enum Operation {
     created,
     deleted,
-    edited,
+    modified,
     NotDefined
 };
 

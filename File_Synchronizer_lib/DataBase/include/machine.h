@@ -1,23 +1,29 @@
 #ifndef FILE_SYNCHRONIZER_MACHINE_H
 #define FILE_SYNCHRONIZER_MACHINE_H
 
-#include <vector>
+#include <unordered_set>
 
 #include "file.h"
 
 class Machine {
 private:
+    typedef std::unordered_set<std::filesystem::path, std::hash<std::string>> fileList;
+
     int id;
-    std::vector<File> syncFiles;
+    fileList syncFiles;
 public:
+    Machine() = default;
+    Machine(const int& _id): id(_id) {};
     virtual ~Machine() = default;
 
     void SetId(const int& id_machine);
     int GetId();
-    std::vector<File> GetSyncFilesListForMachine();
+    fileList GetSyncFilesListForMachine();
     int GetCountSyncFilesForMachine();
-    void AddFileForSync(const File& file);
-    void DeleteFileForSync(const File& file);
+    void AddFileForSync(File file);
+    void AddFileForSync(const std::filesystem::path& file);
+    void DeleteFileForSync(File file);
+    void DeleteFileForSync(const std::filesystem::path& file);
     void ClearSyncFiles();
 
     void Print(std::ostream &out);

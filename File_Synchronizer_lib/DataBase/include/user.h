@@ -3,14 +3,14 @@
 
 #include <string>
 #include <utility>
-#include <vector>
+#include <unordered_set>
 
 #include "machine.h"
 
 class User {
 private:
     std::string username;
-    std::vector<int> connectedMachines;
+    std::unordered_set<int> connectedMachines;
 public:
     User(): username("undefined") {};
     User(std::string _username): username(std::move(_username)) {};
@@ -18,7 +18,7 @@ public:
 
     void SetUsername(const std::string& name);
     std::string GetUsername();
-    std::vector<int> GetConnectedMachines();
+    std::unordered_set<int> GetConnectedMachines();
     int GetCountConnectedMachines();
     void AddConnectedMachine(Machine machine);
     void AddConnectedMachine(const int& machine);

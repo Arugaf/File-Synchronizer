@@ -1,14 +1,16 @@
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
+// #include <gmock/gmock.h>
 #include <fstream>
 
 #include "transactionjournal.h"
-#include "../src/filemanagers.hpp"
+#include "versionmanager.h"
 
+/*
 class MockTransaction : public ITransaction {
 public:
     MOCK_METHOD(std::string, GetMessage, ());
 };
+*/
 
 class TestJournal : public ITransactionJournal {
 private:
@@ -79,28 +81,32 @@ TEST(JournalTest, ClearJournal) {
     EXPECT_EQ(size, 0);
 }
 
-//#include "versionmanager.h"
+#include "filesystem_imitation.hpp"
 
-/*
 TEST(JournalTest, LogVersions) {
+    std::string testSequence = "test";
+
+    std::string testFile = "test.txt";
+    std::filesystem::path relativePath = "sandbox";
+    relativePath /= testFile;
+    std::filesystem::path source = std::filesystem::absolute(relativePath);
+
+    std::filesystem::create_directory(source.parent_path());
+    std::filesystem::remove_all(source.parent_path() / source.stem());
+
+    std::ofstream fOut(source);
+    fOut << testSequence;
+    fOut.close();
+
     TestJournal testLogger;
 
     VersionManager vManager(&testLogger);
-    vManager.SetVersionsPath("");
+    vManager.SetVersionsPath(source.parent_path());
 
-    std::filesystem::path testFile("test.txt");
-    std::filesystem::create_directories(testFile);
+    File fileObject(source);
 
-    std::ofstream file(testFile);
-    if (file.is_open()) {
-        file << "Experience tranquility";
-    }
-    file.close();
-
-    File fileObject(testFile.filename(), testFile);
     vManager.CreateVersion(fileObject);
 
     int size = testLogger.GetJournalSize();
     EXPECT_EQ(size, 2);
-
-}*/
+}

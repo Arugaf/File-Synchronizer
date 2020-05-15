@@ -4,6 +4,10 @@ void File::SetFilename(const std::string &name) {
     filename = name;
 }
 
+void File::SetFilename(const std::filesystem::path &source) {
+    filename = source.filename().string();
+}
+
 std::string File::GetFilename() {
     return filename;
 }

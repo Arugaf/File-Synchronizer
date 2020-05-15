@@ -13,13 +13,13 @@
 template <typename T>
 class IFileManager {
 private:
-/*    void PrintInFile(T object, const std::filesystem::path& sourcefile) {
+    void PrintInFile(T object, const std::filesystem::path& sourcefile) {
             std::ofstream file(sourcefile);
             if (file.is_open()) {
                 object.Print(file);
             }
             file.close();
-    }*/
+    }
 public:
     virtual ~IFileManager() = default;
 
@@ -27,11 +27,7 @@ public:
         try {
             std::filesystem::create_directories(source);
 
-            std::ofstream file(source);
-            if (file.is_open()) {
-                object.Print(file);
-            }
-            file.close();
+            PrintInFile(object, source);
 
         } catch (std::filesystem::filesystem_error& exception) {
             throw exception;
@@ -43,18 +39,16 @@ public:
         try {
             success = std::filesystem::remove_all(source);
 
+            // TODO: exception сделать класс наследник
+            // TODO: try catch в отдельный блок
         } catch (std::filesystem::filesystem_error& exception) {
-            throw success;
+            throw exception;
         }
     };
 
     virtual void Update(T object, const std::filesystem::path& source) {
         try {
-            std::ofstream file(source);
-            if (file.is_open()) {
-                object.Print(file);
-            }
-            file.close();
+            PrintInFile(object, source);
 
         } catch (std::filesystem::filesystem_error& exception) {
             throw exception;
@@ -135,7 +129,7 @@ void UserInfoFileManager::Update(User user) {
             << "If you trying to create new user, try Create function";
     }
 
-    Transaction transaction(Operation::edited, usersPath / path, 1);
+    Transaction transaction(Operation::modified, usersPath / path, 1);
     transaction.FormMessage();
     logger->AddTransaction(transaction);
 }
@@ -175,7 +169,8 @@ class MachineInfoFileManager : public IFileManager<Machine> {
 private:
     std::filesystem::path machineinfoPath;
 public:
-    explicit MachineInfoFileManager(const std::filesystem::path& source) {
+    MachineInfoFileManager() = default;
+    MachineInfoFileManager(const std::filesystem::path& source) {
         SetMachineinfoPath(source);
     };
     ~MachineInfoFileManager() override = default;
@@ -229,12 +224,9 @@ void MachineInfoFileManager::Update(Machine machine) {
 }
 
 Machine MachineInfoFileManager::GetMachine() {
-
-
     return Machine();
 }
 // ----------------------------------------------------------------------------------
-// TODO: class filesystem в machinetest + struct directory (name) + struct file (name content)
 
 
 // ------------------------------------- FILE ---------------------------------------
@@ -305,7 +297,7 @@ void FileInfoFilemanager::Update(File file) {
         msg << exception.what() << std::endl;
     }
 
-    Transaction transaction(Operation::edited, fileinfoPath / file.GetFilename(), 1);
+    Transaction transaction(Operation::modified, fileinfoPath / file.GetFilename(), 1);
     transaction.FormMessage();
     logger->AddTransaction(transaction);
 }
