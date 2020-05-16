@@ -13,7 +13,6 @@ set(${database}_lib_sources ${${database}_lib_sources_dir}/file.cpp
                             ${${database}_lib_sources_dir}/transaction.cpp
                             ${${database}_lib_sources_dir}/transactionjournal.cpp
                             ${${database}_lib_sources_dir}/user.cpp
-                            ${${database}_lib_sources_dir}/version.cpp
                             ${${database}_lib_sources_dir}/versioncreator.cpp
                             ${${database}_lib_sources_dir}/versionmanager.cpp
                             ${${database}_lib_headers_dir}/filemanagers.hpp

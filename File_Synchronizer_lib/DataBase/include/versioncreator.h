@@ -24,8 +24,8 @@ public:
 
     virtual ~VersionCreator() = default;
 
-    std::filesystem::path AddToIndex(const std::filesystem::path& sourceFilePath, const std::filesystem::path& versionsDirectory);
-    std::filesystem::path CreateDiff(const std::filesystem::path& sourceFilePath, const std::filesystem::path& versionsDirectory);
+    virtual std::filesystem::path AddToIndex(const std::filesystem::path& sourceFilePath, const std::filesystem::path& versionsDirectory);
+    virtual std::filesystem::path CreateDiff(const std::filesystem::path& sourceFilePath, const std::filesystem::path& versionsDirectory);
 };
 
 #endif //FILE_SYNCHRONIZER_VERSIONCREATOR_H

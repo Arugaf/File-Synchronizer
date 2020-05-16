@@ -29,8 +29,8 @@ public:
     void SetVersionsPath(const std::filesystem::path& source);
     std::filesystem::path GetVersionsPath();
     void CreateVersion(File file);
-    void DeleteVersion(const std::string& filename, const std::string& version);
-    std::vector<std::filesystem::path> GetVersionHistoryForFile(const std::string& filename, std::ostream &out);
+    int DeleteVersion(const std::filesystem::path& file, const std::string& version);
+    std::vector<std::filesystem::path> GetVersionHistoryForFile(const std::string& filename, const std::string& number);
 };
 
 #endif //FILE_SYNCHRONIZER_VERSIONMANAGER_H

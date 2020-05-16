@@ -1,16 +1,9 @@
 #include <gtest/gtest.h>
-// #include <gmock/gmock.h>
 #include <fstream>
 
 #include "transactionjournal.h"
 #include "versionmanager.h"
 
-/*
-class MockTransaction : public ITransaction {
-public:
-    MOCK_METHOD(std::string, GetMessage, ());
-};
-*/
 
 class TestJournal : public ITransactionJournal {
 private:
@@ -20,7 +13,7 @@ public:
         _tr.SetMessage("I'm transaction for test!");
         log.push_back(_tr);
     };
-    void DeleteTransaction() override {
+    void DeleteLastTransaction() override {
         log.pop_back();
     };
     void Clear() override {
@@ -62,7 +55,7 @@ TEST(JournalTest, DeleteTransaction) {
     size = testLogger.GetJournalSize();
     EXPECT_EQ(size, 2);
 
-    testLogger.DeleteTransaction();
+    testLogger.DeleteLastTransaction();
     size = testLogger.GetJournalSize();
     EXPECT_EQ(size, 1);
 }

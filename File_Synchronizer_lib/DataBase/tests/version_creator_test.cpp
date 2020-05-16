@@ -1,79 +1,51 @@
 #include <gtest/gtest.h>
 #include <fstream>
+#include <chrono>
+#include <thread>
 
 #include "versioncreator.h"
+#include "fileinit_for_tests.hpp"
 
 
-TEST (VersionCreatorTest, CreateIndexCopy) {
-    std::string message;
-    VersionCreator vCreator;
-
+TEST_F(VersionTests, CreateIndexByCopy) {
     std::string firstSequence = "FIRST";
     std::string secondSequence = "SECOND";
 
-    std::string testFile = "tracking.txt";
-    std::filesystem::path relativePath = "sandbox";
-    relativePath /= testFile;
-    std::filesystem::path source = std::filesystem::absolute(relativePath);
+    std::filesystem::path pathToTestFile = source.parent_path().string() + "/" + source.stem().string()
+                                            + "/index" + source.extension().string();
 
-    std::filesystem::create_directory(source.parent_path());
-
-    std::ofstream fOut(source);
-    fOut << firstSequence;
-    fOut.close();
-
-    std::ifstream fRead(source);
-    std::getline(fRead, message);
+    fileWrite(source, firstSequence);
+    fileRead(source);
     ASSERT_EQ(message, firstSequence);
 
     vCreator.AddToIndex(source, source.parent_path());
-
-    std::ifstream indexRead("index" + source.extension().string());
-    std::getline(indexRead, message);
-
+    fileRead(pathToTestFile);
     EXPECT_EQ(message, firstSequence);
 
-    fOut.open(source);
-    fOut << secondSequence;
-    fOut.close();
+    fileWrite(source, secondSequence);
 
     vCreator.AddToIndex(source, source.parent_path());
-
-    indexRead.open("index" + source.extension().string());
-    std::getline(indexRead, message);
-
-    EXPECT_EQ(message, firstSequence);
+    fileRead(pathToTestFile);
+    EXPECT_EQ(message, secondSequence);
 }
 
-TEST (VersionCreatorTest, CreateVersionByCopy) {
-    std::string message;
-    VersionCreator vCreator;
-    std::vector<std::filesystem::path> history;
-
+TEST_F(VersionTests, CreateVersionByCopy) {
     std::string firstSequence = "FIRST";
     std::string secondSequence = "SECOND";
 
-    std::string testFile = "tracking.txt";
-    std::filesystem::path relativePath = "sandbox";
-    relativePath /= testFile;
-    std::filesystem::path source = std::filesystem::absolute(relativePath);
+    std::vector<std::filesystem::path> history;
 
-    std::filesystem::create_directory(source.parent_path());
-    std::filesystem::remove_all(source.parent_path() / source.stem());
-
-    std::ofstream fOut(source);
-    fOut << firstSequence;
-    fOut.close();
-
-    std::ifstream fRead(source);
-    std::getline(fRead, message);
+    fileWrite(source, firstSequence);
+    fileRead(source);
     ASSERT_EQ(message, firstSequence);
 
     vCreator.CreateDiff(source, source.parent_path());
 
-    fOut.open(source);
-    fOut << secondSequence;
-    fOut.close();
+    // Для разницы во времени создания версии
+    using namespace std::literals::chrono_literals;
+    std::this_thread::sleep_for(1s);
+
+    fileWrite(source, secondSequence);
 
     vCreator.CreateDiff(source, source.parent_path());
 
@@ -81,17 +53,12 @@ TEST (VersionCreatorTest, CreateVersionByCopy) {
         history.push_back(item);
     }
     std::sort(history.begin(), history.end(), [](const std::filesystem::path& l, const std::filesystem::path& r) {
-        return (std::filesystem::last_write_time(l) < std::filesystem::last_write_time(r));
+      return (std::filesystem::last_write_time(l) < std::filesystem::last_write_time(r));
     });
 
-    std::ifstream versionRead;
-    versionRead.open(history[0]);
-    std::getline(versionRead, message);
+    fileRead(history[0]);
     EXPECT_EQ(message, firstSequence);
-    versionRead.close();
 
-    versionRead.open(history[1]);
-    std::getline(versionRead, message);
+    fileRead(history[1]);
     EXPECT_EQ(message, secondSequence);
 }
-

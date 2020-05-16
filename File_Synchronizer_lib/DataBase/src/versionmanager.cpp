@@ -12,6 +12,7 @@ void VersionManager::CreateVersion(File file) {
     std::filesystem::path versionPath =  versionCreator->CreateDiff(file.GetFilepath(), versionsPath);
     std::filesystem::path index = versionCreator->AddToIndex(file.GetFilepath(), versionsPath);
 
+    // TODO: map <file, history>?
     history.push_back(versionPath);
 
     Transaction versionTransaction(Operation::created, versionPath, 1);
@@ -23,37 +24,40 @@ void VersionManager::CreateVersion(File file) {
 
 }
 
-void VersionManager::DeleteVersion(const std::string& filename, const std::string& version) {
-    std::filesystem::path pathToVersionForDelete = versionsPath / filename / version;
+int VersionManager::DeleteVersion(const std::filesystem::path& file, const std::string& version) {
+    std::filesystem::path pathToVersionForDelete = versionsPath / file.stem() / version;
 
-    if (!std::filesystem::exists(version)) {
-        return;
-    } else {
-        int success = 0;
-        try {
-            success = std::filesystem::remove_all(pathToVersionForDelete);
+    int success = 0;
+    success = std::filesystem::remove_all(pathToVersionForDelete);
 
-        } catch (std::filesystem::filesystem_error& exception) {
-            throw exception;
-        }
+    if (success != 0) {
+        Transaction deleteTransaction(Operation::deleted, pathToVersionForDelete, 1);
+        logger->AddTransaction(deleteTransaction);
     }
+
+    return success;
 }
 
-std::vector<std::filesystem::path> VersionManager::GetVersionHistoryForFile(const std::string& filename, std::ostream &out) {
+#include <iostream>
+
+std::vector<std::filesystem::path> VersionManager::GetVersionHistoryForFile(const std::string& filename, const std::string& number) {
     namespace fs = std::filesystem;
     fs::path source = versionsPath / filename;
+    history.clear();
 
     for (auto& item: std::filesystem::directory_iterator(source) ) {
-        history.push_back(item);
+        if (item.path().stem() != "index") {
+            history.push_back(item);
+        }
     }
 
     std::sort(history.begin(), history.end(), [](const fs::path& l, const fs::path& r) {
       return (fs::last_write_time(l) < fs::last_write_time(r));
     });
 
-    for (auto& item: history) {
-        out << item << std::endl;
+    if (number == "*") {
+        return history;
+    } else {
+        return reinterpret_cast<const std::vector<std::filesystem::path> &>(history[std::stoi(number)]);
     }
-
-    return history;
 }

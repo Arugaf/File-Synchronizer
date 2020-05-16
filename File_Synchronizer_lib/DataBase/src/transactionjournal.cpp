@@ -20,7 +20,7 @@ void TransactionJournal::AddTransaction(Transaction transaction) {
     currentTransaction++;
 }
 
-void TransactionJournal::DeleteTransaction() {
+void TransactionJournal::DeleteLastTransaction() {
     transactionList.pop_back();
     currentTransaction--;
 }

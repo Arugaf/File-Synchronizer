@@ -7,6 +7,7 @@ set(${database}_tests_sources ${${database}_tests_sources_dir}/main.cpp
                               ${${database}_tests_sources_dir}/logging_test.cpp
                               ${${database}_tests_sources_dir}/object_classes_test.cpp
                               ${${database}_tests_sources_dir}/version_creator_test.cpp
+                              ${${database}_tests_sources_dir}/version_manager_test.cpp
         )
 
 
