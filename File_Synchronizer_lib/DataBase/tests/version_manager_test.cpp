@@ -1,3 +1,4 @@
+/*
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include <fstream>
@@ -42,7 +43,7 @@ public:
         std::string index = "index" + sourceFilePath.extension().string();
         return sourceFilePath.parent_path() / sourceFilePath.stem() / index;
     }
-    std::filesystem::path CreateDiff(const std::filesystem::path& sourceFilePath, const std::filesystem::path& versionsDirectory) override {
+    std::filesystem::path CreateVersion(const std::filesystem::path& sourceFilePath, const std::filesystem::path& versionsDirectory) override {
         std::string version = HashIsFileContent(sourceFilePath) + sourceFilePath.extension().string();
         return sourceFilePath.parent_path() / sourceFilePath.stem() / version;
     }
@@ -54,14 +55,14 @@ private:
 public:
     typedef std::filesystem::path path;
     MOCK_METHOD(path, AddToIndex, (const path&, const path&), (override));
-    MOCK_METHOD(path, CreateDiff, (const path&, const path&), (override));
+    MOCK_METHOD(path, CreateVersion, (const path&, const path&), (override));
 
     void DelegateToFake() {
         ON_CALL(*this, AddToIndex).WillByDefault([this](const path& source, const path& directory){
           return fake.AddToIndex(source, directory);
         });
-        ON_CALL(*this, CreateDiff).WillByDefault([this](const path& source, const path& directory){
-          return fake.CreateDiff(source, directory);
+        ON_CALL(*this, CreateVersion).WillByDefault([this](const path& source, const path& directory){
+          return fake.CreateVersion(source, directory);
         });
     }
 };
@@ -78,7 +79,7 @@ TEST_F(VersionTests, CreateVesionInManager) {
 
     using ::testing::_;
     EXPECT_CALL(vCreator, AddToIndex(_, _));
-    EXPECT_CALL(vCreator, CreateDiff(_, _));
+    EXPECT_CALL(vCreator, CreateVersion(_, _));
 
     std::string testContent = "TESTFILE";
     fileWrite(source, testContent);
@@ -102,7 +103,7 @@ TEST_F(VersionTests, DeleteVesionInManager) {
 
     using ::testing::_;
     EXPECT_CALL(vCreator, AddToIndex(_, _));
-    EXPECT_CALL(vCreator, CreateDiff(_, _));
+    EXPECT_CALL(vCreator, CreateVersion(_, _));
 
     std::string testContent = "TESTFILE";
     fileWrite(source, testContent);
@@ -137,9 +138,20 @@ TEST_F(VersionTests, GetFileHistory) {
     fileWrite(source, secondSequence);
     vManager.CreateVersion(file);
 
+    // Полная история файла
     std::vector<std::filesystem::path> history = vManager.GetVersionHistoryForFile(source.stem().string(), "*");
     fileRead(history[0]);
     EXPECT_EQ(message, firstSequence);
     fileRead(history[1]);
     EXPECT_EQ(message, secondSequence);
+
+    history = vManager.GetVersionHistoryForFile(source.stem().string(), "last");
+    fileRead(history[0]);
+    EXPECT_EQ(message, secondSequence);
+
+    // Превышение по номеру версии отдаст последнюю версию
+    history = vManager.GetVersionHistoryForFile(source.stem().string(), "15");
+    fileRead(history[0]);
+    EXPECT_EQ(message, secondSequence);
 }
+*/

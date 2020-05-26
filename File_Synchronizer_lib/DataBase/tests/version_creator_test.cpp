@@ -39,7 +39,7 @@ TEST_F(VersionTests, CreateVersionByCopy) {
     fileRead(source);
     ASSERT_EQ(message, firstSequence);
 
-    vCreator.CreateDiff(source, source.parent_path());
+    vCreator.CreateVersion(source, source.parent_path());
 
     // Для разницы во времени создания версии
     using namespace std::literals::chrono_literals;
@@ -47,7 +47,7 @@ TEST_F(VersionTests, CreateVersionByCopy) {
 
     fileWrite(source, secondSequence);
 
-    vCreator.CreateDiff(source, source.parent_path());
+    vCreator.CreateVersion(source, source.parent_path());
 
     for ( auto& item: std::filesystem::directory_iterator(source.parent_path() / source.stem()) ) {
         history.push_back(item);

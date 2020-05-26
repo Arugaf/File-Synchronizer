@@ -3,25 +3,44 @@
 
 #include <filesystem>
 
-class Database {
+template <typename DBImpl>
+class DatabaseWrapper {
 private:
     std::filesystem::path dbPath;
 public:
-    virtual ~Database() = default;
 
-    void SetDbPath(const std::filesystem::path& source);
-    std::filesystem::path GetDbPath();
-    std::filesystem::path GetFileInfofile(const std::string& filename);
-    std::filesystem::path GetFileInfofile();
-    std::filesystem::path GetUserInfofile(const std::string& username);
-    std::filesystem::path GetUserInfofile();
-    std::filesystem::path GetJournal();
-    std::filesystem::path GetVersions();
-    std::filesystem::path GetAllVersionsForFile(const std::string& filename);
-    std::filesystem::path GetLastVersionForFile(const std::string& filename);
-    std::filesystem::path GetMachineInfofile();
-    std::filesystem::path GetDB();
+    ~DatabaseWrapper() = default;
+
+    void SetDbPath(const std::filesystem::path& source) {
+        dbPath = source;
+    }
+    std::filesystem::path GetDbPath() {
+        return dbPath;
+    }
+
+    void DeleteFile(const std::string& filename) {
+        static_cast<DBImpl*>(this)->Delete(filename);
+    }
+    void CreateFile(const std::string& filename, const std::string& operationTime) {
+        static_cast<DBImpl*>(this)->Create(filename, operationTime);
+    }
+    void UpdateFile(const std::string& filename, const std::string& operationTime) {
+        static_cast<DBImpl*>(this)->Update(filename, operationTime);
+    }
 };
+
+
+class Database : public DatabaseWrapper<Database> {
+private:
+
+public:
+    void Delete(const std::string& filename);
+    void Create(const std::string& filename, const std::string& operationTime);
+    void Update(const std::string& filename, const std::string& operationTime);
+};
+
+
+
 
 
 #endif //FILE_SYNCHRONIZER_DATABASE_H

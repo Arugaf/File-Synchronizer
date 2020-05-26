@@ -3,45 +3,31 @@
 
 #include <filesystem>
 #include <utility>
+#include <ctime>
 
-enum Operation {
+enum class Operation {
     created,
     deleted,
-    modified,
-    NotDefined
+    modified
 };
 
-class ITransaction {
-private:
-    std::string message;
-public:
-    void SetMessage(const std::string& _message) {
-        message = _message;
+std::string_view to_string(Operation operation) {
+    switch (operation) {
+        case Operation::created: return "created";
+        case Operation::deleted: return "deleted";
+        case Operation::modified: return "modified";
     }
-    virtual std::string GetMessage() {
-        return message;
-    }
+}
 
-    bool operator==(const ITransaction& right) {
-        return this->message == right.message;
-    }
-};
-
-
-class Transaction : public ITransaction {
-private:
-    Operation operation;
+struct Transaction {
     std::filesystem::path target;
-    int sourceMachine;
-public:
-    Transaction(): operation(NotDefined), sourceMachine(-1) {};
-    Transaction(const Operation& _operation, std::filesystem::path _target, const int& _id):
-                operation(_operation), target(std::move(_target)), sourceMachine(_id) {};
-    void FormMessage();
-    std::tuple<Operation, std::filesystem::path, int> GetParams();
+    std::chrono::system_clock::time_point lastOperationTime;
+    Operation operation;
 
-    void Print(std::ostream &out);
+    Transaction(const Operation& _operation, std::filesystem::path _target):
+                operation(_operation), lastOperationTime(std::chrono::system_clock::now()), target(std::move(_target)) {};
 };
+
 
 
 #endif //FILE_SYNCHRONIZER_TRANSACTION_H

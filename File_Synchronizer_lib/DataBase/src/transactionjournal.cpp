@@ -1,33 +1,15 @@
 #include "transactionjournal.h"
 
 #include <fstream>
-
-void TransactionJournal::SetJournalPath(const std::filesystem::path &source) {
-    journalPath = source / "journal.txt";
-    std::filesystem::create_directories(journalPath);
-}
-
-std::filesystem::path TransactionJournal::GetJournalPath() {
-    return journalPath;
-}
-
-std::vector<Transaction> TransactionJournal::GetTransactionList() {
-    return transactionList;
-}
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 
 void TransactionJournal::AddTransaction(Transaction transaction) {
     transactionList.push_back(transaction);
-    currentTransaction++;
-}
-
-void TransactionJournal::DeleteLastTransaction() {
-    transactionList.pop_back();
-    currentTransaction--;
 }
 
 void TransactionJournal::Clear() {
     transactionList.clear();
-    currentTransaction = 0;
 
     FixJournal();
 }
@@ -37,15 +19,23 @@ int TransactionJournal::GetJournalSize() {
 }
 
 void TransactionJournal::FixJournal() {
-    std::ofstream file(journalPath);
+    boost::property_tree::ptree root;
 
-    if (file.is_open()) {
-        for (auto item : transactionList) {
-            item.Print(file);
-        }
+    boost::property_tree::ptree list;
+    for (auto &transaction : transactionList) {
+        boost::property_tree::ptree transactionNode;
+        auto readable_time = std::chrono::system_clock::to_time_t(transaction.lastOperationTime);
+
+        transactionNode.put("file", transaction.target.string());
+        transactionNode.put("time", std::asctime(std::localtime(&readable_time)));
+        transactionNode.put("operation", to_string(transaction.operation));
+
+        list.push_back(std::make_pair("", transactionNode));
     }
-    // else throw bad_argument?
-    file.close();
+    root.add_child("journal", list);
+
+    boost::property_tree::write_json(journalPath, root);
 }
+
 
 
