@@ -55,8 +55,7 @@ TEST_F(VersionTests, CreateVesionInManager) {
 
     vCreator.DelegateToFake();
 
-    VersionManager vManager(&vCreator);
-    vManager.SetVersionsPath(source.parent_path());
+    VersionManager vManager(source.parent_path(), &vCreator);
 
     std::string testContent = "TESTFILE";
     fileWrite(source, testContent);
@@ -78,8 +77,7 @@ TEST_F(VersionTests, DeleteVesionInManager) {
 
     vCreator.DelegateToFake();
 
-    VersionManager vManager(&vCreator);
-    vManager.SetVersionsPath(source.parent_path());
+    VersionManager vManager(source.parent_path(), &vCreator);
 
     using ::testing::_;
     EXPECT_CALL(vCreator, AddToIndex(_, _));
@@ -99,8 +97,7 @@ TEST_F(VersionTests, DeleteVesionInManager) {
 }
 
 TEST_F(VersionTests, GetFileHistory) {
-    VersionManager vManager;
-    vManager.SetVersionsPath(source.parent_path());
+    VersionManager vManager(source.parent_path());
 
     std::string firstSequence = "FIRST";
     std::string secondSequence = "SECOND";
@@ -116,18 +113,15 @@ TEST_F(VersionTests, GetFileHistory) {
     vManager.CreateVersion(source);
 
     // Полная история файла
-    std::vector<std::filesystem::path> history = vManager.GetVersionHistoryForFile(source.stem().string(), "*");
+    std::vector<std::filesystem::path> history = vManager.GetVersionHistoryForFile(source);
     fileRead(history[0]);
     EXPECT_EQ(message, firstSequence);
     fileRead(history[1]);
     EXPECT_EQ(message, secondSequence);
 
-    history = vManager.GetVersionHistoryForFile(source.stem().string(), "last");
-    fileRead(history[0]);
-    EXPECT_EQ(message, secondSequence);
 
     // Превышение по номеру версии отдаст последнюю версию
-    history = vManager.GetVersionHistoryForFile(source.stem().string(), "15");
+    history = vManager.GetVersionHistoryForFile(source, 15);
     fileRead(history[0]);
     EXPECT_EQ(message, secondSequence);
 }
