@@ -1,83 +1,50 @@
-#include "FileWatcher.hpp"
+#include "FileWatcher.h"
 
-// TODO: Можно ли переделать с делегирующими конструкторами, чтобы избавиться от копипасты?
+#include <utility>
 
-FileSynchronizer::FileWatcher::
-FileWatcher(std::string path_to_watch,
-            int ms_delay) : path_to_watch(std::move(path_to_watch)),
-                            mediator(nullptr),
-                            delay(ms_delay),
-                            ignored_files() {
-    if (!std::filesystem::exists(this->path_to_watch)) {
-        throw FileWatcherException::InvalidPath(this->path_to_watch);
-    }
+using FileSynchronizer::FileWatcher;
+using FileSynchronizer::FileStatuses;
 
-    for (const auto& file : std::filesystem::recursive_directory_iterator(this->path_to_watch)) {
-        if (!IsIgnored(file.path().string())) {
-            files[file.path().string()] = std::make_pair(std::filesystem::last_write_time(file),
-                                                         file.status().type());
+FileWatcher::FileWatcher(path_list paths_to_watch, int ms_delay) :
+FileWatcher(std::move(paths_to_watch), FileNames(), ms_delay) {
+
+}
+
+FileWatcher::FileWatcher(path_list paths_to_watch, FileNames ignored_files, int ms_delay) :
+FileWatcher(std::move(paths_to_watch), std::move(ignored_files), FilesInfo(), ms_delay) {
+    /*for (const auto& path_to_watch : this->paths_to_watch) {
+        for (const auto& file : fs::recursive_directory_iterator(path_to_watch)) {
+            if (!IsIgnored(file.path())) {
+                files[file.path()] = {fs::last_write_time(file), file.status().type()};
+                changed_files[file.path()] = FileStatus::Created;
+            }
+        }
+    }*/
+}
+
+FileWatcher::FileWatcher(path_list paths_to_watch, FilesInfo previous_files, int ms_delay) :
+FileWatcher(std::move(paths_to_watch), FileNames(), std::move(previous_files), ms_delay) {
+
+}
+
+FileWatcher::FileWatcher(path_list paths_to_watch, FileNames ignored_files, FilesInfo previous_files, int ms_delay) :
+                         paths_to_watch(std::move(paths_to_watch)),
+                         mediator(nullptr),
+                         delay(ms_delay),
+                         ignored_files(std::move(ignored_files)),
+                         files(std::move(previous_files)) {
+    for (const auto& path_to_watch : this->paths_to_watch) {
+        if (!fs::exists(path_to_watch) || !fs::is_directory(path_to_watch) /*lexical*/) {
+            throw FileWatcherException::InvalidPath(path_to_watch);
         }
     }
 }
 
-FileSynchronizer::FileWatcher::
-FileWatcher(std::string path_to_watch,
-            std::unordered_set<std::string> ignored_files,
-            int ms_delay) : path_to_watch(std::move(path_to_watch)),
-                            mediator(nullptr),
-                            delay(ms_delay),
-                            ignored_files(std::move(ignored_files)) {
-    if (!std::filesystem::exists(this->path_to_watch)) {
-        throw FileWatcherException::InvalidPath(this->path_to_watch);
-    }
-
-    for (const auto& file : std::filesystem::recursive_directory_iterator(this->path_to_watch)) {
-        if (!IsIgnored(file.path().string())) {
-            files[file.path().string()] = std::make_pair(std::filesystem::last_write_time(file),
-                                                         file.status().type());
-        }
-    }
-}
-
-FileSynchronizer::FileWatcher::
-FileWatcher(std::string path_to_watch,
-            std::unordered_map<std::string,
-                               std::pair<std::filesystem::file_time_type,
-                                         std::filesystem::file_type>> previous_files,
-            int ms_delay) : path_to_watch(std::move(path_to_watch)),
-                            mediator(nullptr),
-                            delay(ms_delay),
-                            ignored_files(),
-                            files(std::move(previous_files)) {
-    if (!std::filesystem::exists(this->path_to_watch)) {
-        throw FileWatcherException::InvalidPath(this->path_to_watch);
-    }
-}
-
-FileSynchronizer::FileWatcher::
-FileWatcher(std::string path_to_watch,
-            std::unordered_set<std::string> ignored_files,
-            std::unordered_map<std::string,
-                               std::pair<std::filesystem::file_time_type,
-                                         std::filesystem::file_type>> previous_files,
-            int ms_delay) : path_to_watch(std::move(path_to_watch)),
-                            mediator(nullptr),
-                            delay(ms_delay),
-                            ignored_files(std::move(ignored_files)),
-                            files(std::move(previous_files)) {
-    if (!std::filesystem::exists(this->path_to_watch)) {
-        throw FileWatcherException::InvalidPath(this->path_to_watch);
-    }
-}
-
-FileSynchronizer::FileWatcher::
-~FileWatcher() {
+FileWatcher::~FileWatcher() {
     StopWatching();
 }
 
-void
-FileSynchronizer::FileWatcher::
-Watch() {
+void FileWatcher::Watch() {
     while (working) {
         std::this_thread::sleep_for(delay);
         if (watching) {
@@ -88,7 +55,7 @@ Watch() {
                 while (file != files.end()) {
                     if (IsExisting(file)) {
                         if (IsChanged(file)) {
-                            UpdateFile(file, FileStatus::Changed);
+                            UpdateFile(file, FileStatus::Modified);
                         }
                         ++file;
                     } else {
@@ -98,13 +65,14 @@ Watch() {
             }
 
             // Checking for newly created files
-            for (const auto& file : std::filesystem::recursive_directory_iterator(path_to_watch)) {
-                if (files.find(file.path().string()) != files.end() || IsIgnored(file.path().string())) {
-                    continue;
+            for (const auto& path_to_watch : paths_to_watch) {
+                for (const auto& file : fs::recursive_directory_iterator(path_to_watch)) {
+                    if (files.find(file.path()) != files.end() || IsIgnored(file.path())) {
+                        continue;
+                    }
+                    files[file.path()] = {fs::last_write_time(file), file.status().type()};
+                    UpdateFile(files.find(file.path()), FileStatus::Created);
                 }
-                files[file.path().string()] = std::make_pair(std::filesystem::last_write_time(file),
-                                                             file.status().type());
-                UpdateFile(files.find(file.path().string()), FileStatus::Created);
             }
 
             // Notify
@@ -120,9 +88,7 @@ Watch() {
     }
 }
 
-void
-FileSynchronizer::FileWatcher::
-StartWatching(IMediator* new_mediator) {
+void FileWatcher::StartWatching(const std::shared_ptr<IMediator>& new_mediator) {
     changed_files.clear();
     mediator = new_mediator;
     if (!working) {
@@ -132,9 +98,7 @@ StartWatching(IMediator* new_mediator) {
     }
 }
 
-void
-FileSynchronizer::FileWatcher::
-StopWatching() {
+void FileWatcher::StopWatching() {
     working = false;
     if (watcher.joinable()) {
         watcher.join();
@@ -142,52 +106,31 @@ StopWatching() {
     while (IsActive());
 }
 
-void
-FileSynchronizer::FileWatcher::
-PauseWatching() {
+void FileWatcher::PauseWatching() {
     watching = false;
 }
 
-void
-FileSynchronizer::FileWatcher::
-ContinueWatching() {
+void FileWatcher::ContinueWatching() {
     changed_files.clear();
     watching = true;
 }
 
-bool
-FileSynchronizer::FileWatcher::
-IsIgnored(const std::string& file) const {
-    return ignored_files.find(file) != ignored_files.end();
+inline bool FileWatcher::IsIgnored(const std::string& file) const {
+    return ignored_files.Find(file);
 }
 
-std::unordered_map<std::string, FileSynchronizer::FileStatus>
-FileSynchronizer::FileWatcher::
-GetChangedFiles() const {
+FileStatuses FileWatcher::GetChangedFiles() const {
     return changed_files;
 }
 
-void
-FileSynchronizer::FileWatcher::
-UpdateFile(const std::string& relative_path) {
-    auto file = path_to_watch + relative_path;
-    if (std::filesystem::exists(std::filesystem::path(file)) && !IsIgnored(file)) {
-        if (files.find(file) == files.end()) {
-            files[file] = std::make_pair(std::filesystem::last_write_time(file), std::filesystem::status(file).type());
-        } else {
-            files[file].first = std::filesystem::last_write_time(file);
-        }
-    }
-}
-
-bool
-FileSynchronizer::FileWatcher::
-IsWorking()const {
+bool FileWatcher::IsWorking()const {
     return working;
 }
 
-bool
-FileSynchronizer::FileWatcher::
-IsWatching() const {
+bool FileWatcher::IsWatching() const {
     return watching;
+}
+
+bool FileSynchronizer::FileWatcher::IsActive() const {
+    return watcher.joinable();
 }
