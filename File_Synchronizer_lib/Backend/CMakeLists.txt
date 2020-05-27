@@ -11,14 +11,18 @@ set(${backend}_lib_headers_dir ${backend_path}/include)
 # Sources
 set(${backend}_lib_sources_dir ${backend_path}/src)
 set(${backend}_lib_sources ${${backend}_lib_sources_dir}/FileWatcher.cpp
-                           ${${backend}_lib_sources_dir}/SyncController.cpp)
+                           ${${backend}_lib_sources_dir}/FileNames.cpp
+                           ${${backend}_lib_sources_dir}/DataBaseController.cpp
+                           ${${backend}_lib_sources_dir}/DataBaseWrapper.cpp
+                           ${${backend}_lib_sources_dir}/FileWatcherException.cpp
+                           ${${backend}_lib_sources_dir}/ApplicationController.cpp
+                           ${${backend}_lib_sources_dir}/VersionManagerWrapper.cpp
+                           ${${backend}_lib_sources_dir}/CommandReader.cpp)
 
 # Library
 add_library(${project_name}_${backend}_lib STATIC ${${backend}_lib_sources})
 target_include_directories(${project_name}_${backend}_lib PUBLIC ${${backend}_lib_headers_dir})
-
-add_executable(test_exec ../../main.cpp)
-target_link_libraries(test_exec PUBLIC ${project_name}_${backend}_lib)
+target_link_libraries(${project_name}_${backend}_lib PUBLIC Log_Parser)
 
 add_subdirectory(tests)
 enable_testing()
