@@ -1,32 +1,28 @@
 #ifndef FILE_SYNCHRONIZER_FILE_SYNCHRONIZER_LIB_DATABASE_SRC_FILEMANAGER_H_
 #define FILE_SYNCHRONIZER_FILE_SYNCHRONIZER_LIB_DATABASE_SRC_FILEMANAGER_H_
 
+#include "iVersionManager.h"
 #include "iFileManager.h"
 #include "TransactionJournal.h"
+#include "VersionManager.h"
 
 class FileManager : IFileManager {
 private:
     std::unordered_map<std::filesystem::path, std::filesystem::file_time_type, std::hash<std::string>> fileList;
     std::filesystem::path trackfile;
 
-    ITransactionJournal* logger;
+    ITransactionJournal<Transaction>* logger;
+    VersionManager* versionManager;
 
+    // Перевод времени из file_time_type в читаемое человеком представление
     template <typename TP>
-    std::time_t to_time_t(TP tp) {
-        using namespace std::chrono;
-        auto sctp = time_point_cast<system_clock::duration>(tp - TP::clock::now()
-                                                                + system_clock::now());
-        return system_clock::to_time_t(sctp);
-    }
+    std::time_t to_time_t(TP tp);
 
 public:
-    FileManager(const std::filesystem::path& source): logger(new TransactionJournal(source)) {
+    FileManager(const std::filesystem::path& source): logger(new TransactionJournal(source)), versionManager(new VersionManager(source)) {
         trackfile = source / "syncfilelist.json";
     };
-    FileManager(const std::filesystem::path& source, ITransactionJournal *_logger) {
-        trackfile = source / "syncfilelist.json";
-        logger = _logger;
-    }
+
     ~FileManager() override = default;
 
     // Получить информацию о файле парой (path:time)

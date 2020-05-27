@@ -4,13 +4,13 @@ void VersionManager::SetVersionsPath(const std::filesystem::path& source) {
     versionsPath = source / "versions";
 }
 
-std::filesystem::path VersionManager::GetVersionsPath() {
-    return versionsPath;
+void VersionManager::CreateIndex(const std::filesystem::path &file) {
+    std::filesystem::path index = versionCreator->AddToIndex(file, versionsPath);
 }
 
 void VersionManager::CreateVersion(const std::filesystem::path& file) {
     std::filesystem::path versionPath =  versionCreator->CreateVersion(file, versionsPath);
-    std::filesystem::path index = versionCreator->AddToIndex(file, versionsPath);
+    CreateIndex(file);
 }
 
 int VersionManager::DeleteVersion(const std::filesystem::path& file, const std::string& version) {
@@ -27,7 +27,7 @@ int VersionManager::DeleteFile(const std::string &filename) {
     return success;
 }
 
-std::vector<std::filesystem::path> VersionManager::GetVersionHistoryForFile(const std::string& filename, const std::string& number) {
+std::vector<std::filesystem::path> VersionManager::GetVersionHistoryForFile(const std::string& filename) {
     namespace fs = std::filesystem;
     fs::path source = versionsPath / filename;
     history.clear();
@@ -42,17 +42,14 @@ std::vector<std::filesystem::path> VersionManager::GetVersionHistoryForFile(cons
         return (fs::last_write_time(l) < fs::last_write_time(r));
     });
 
-    if (number == "*") {
-        return history;
-    } else {
-        std::vector<std::filesystem::path> tmp;
-        if (number == "last" || std::stoi(number) >= history.size() || std::stoi(number) < 0) {
-            tmp.push_back(history.back());
-        } else {
-            tmp.push_back(history[std::stoi(number)]);
-        }
-
-        return tmp;
-    }
+    return history;
 }
+
+std::vector<std::filesystem::path> VersionManager::GetVersionHistoryForFile(const std::string& filename, const int& number) {
+    std::vector<std::filesystem::path> tmp;
+    GetVersionHistoryForFile(filename);
+    tmp.push_back(history[number]);
+    return tmp;
+}
+
 

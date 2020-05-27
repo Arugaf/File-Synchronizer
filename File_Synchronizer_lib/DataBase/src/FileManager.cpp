@@ -12,6 +12,14 @@ struct FileSearchException : public std::exception {
     }
 };
 
+template<typename TP>
+std::time_t FileManager::to_time_t(TP tp) {
+    using namespace std::chrono;
+    auto sctp = time_point_cast<system_clock::duration>(tp - TP::clock::now()
+                                                            + system_clock::now());
+    return system_clock::to_time_t(sctp);
+}
+
 std::pair<std::filesystem::path, std::filesystem::file_time_type> FileManager::GetFileInfo(const std::filesystem::path& file) {
     auto node = fileList.find(file);
 
@@ -31,13 +39,16 @@ FileManager::list FileManager::GetInfo() {
 }
 
 void FileManager::SetFileInfo(const std::filesystem::path& file) {
-
     auto lastOperationTime = std::filesystem::last_write_time(file);
 
     if (fileList.contains(file)) {
+        versionManager->CreateVersion(file);
+
         Transaction transaction(Operation::modified, file);
         logger->AddTransaction(transaction);
     } else {
+        versionManager->CreateIndex(file);
+
         Transaction transaction(Operation::created, file);
         logger->AddTransaction(transaction);
     }
@@ -51,11 +62,10 @@ void FileManager::SetFileInfo(const std::filesystem::path& file) {
 void FileManager::DeleteFile(const std::filesystem::path& file) {
     try {
         fileList.erase(file);
+        versionManager->DeleteFile(file.stem());
     } catch (std::exception &e) {
         throw FileSearchException();
     }
-
-
 
     Transaction transaction(Operation::deleted, file);
     logger->AddTransaction(transaction);
@@ -88,3 +98,4 @@ void FileManager::Save() {
 
     boost::property_tree::write_json(trackfile, root);
 }
+

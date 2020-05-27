@@ -90,7 +90,7 @@ TEST_F(VersionTests, DeleteVesionInManager) {
 
     vManager.CreateVersion(source);
 
-    std::string target = testContent + source.extension().string();
+    std::string target = source.stem().string() + testContent + source.extension().string();
     fileWrite(source.parent_path() / "versions" / target, "");
 
     int countDeleted = 0;
