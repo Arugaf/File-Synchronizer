@@ -24,6 +24,9 @@ add_library(${project_name}_${backend}_lib STATIC ${${backend}_lib_sources})
 target_include_directories(${project_name}_${backend}_lib PUBLIC ${${backend}_lib_headers_dir})
 target_link_libraries(${project_name}_${backend}_lib PUBLIC Log_Parser)
 
+add_executable(test_exec ../../main.cpp)
+target_link_libraries(test_exec PUBLIC ${project_name}_${backend}_lib)
+
 add_subdirectory(tests)
 enable_testing()
 
