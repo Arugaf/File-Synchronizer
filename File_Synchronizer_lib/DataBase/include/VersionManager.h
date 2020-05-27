@@ -1,8 +1,6 @@
 #ifndef FILE_SYNCHRONIZER_VERSIONMANAGER_H
 #define FILE_SYNCHRONIZER_VERSIONMANAGER_H
 
-
-#include "TransactionJournal.h"
 #include "VersionCreator.h"
 #include "iVersionManager.h"
 

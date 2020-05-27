@@ -1,7 +1,7 @@
 #include "VersionManager.h"
 
 void VersionManager::SetVersionsPath(const std::filesystem::path& source) {
-    versionsPath = source;
+    versionsPath = source / "versions";
 }
 
 std::filesystem::path VersionManager::GetVersionsPath() {

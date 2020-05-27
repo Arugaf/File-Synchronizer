@@ -20,30 +20,14 @@ std::string HashIsFileContent(const std::filesystem::path& targetSource) {
     return content;
 }
 
-class tLogger {
-private:
-    std::vector<std::string> messages;
-public:
-    void Add(std::string message) {
-        messages.push_back(message);
-    };
-    std::string Get() {
-        return messages.back();
-    }
-    void DeleteLast() {
-        messages.pop_back();
-    }
-};
-
 class FakeVersionCreator : public VersionCreator {
 public:
     std::filesystem::path AddToIndex(const std::filesystem::path& sourceFilePath, const std::filesystem::path& versionsDirectory) override {
-        std::string index = "index" + sourceFilePath.extension().string();
-        return sourceFilePath.parent_path() / sourceFilePath.stem() / index;
+        return "index" + sourceFilePath.extension().string();
     }
     std::filesystem::path CreateVersion(const std::filesystem::path& sourceFilePath, const std::filesystem::path& versionsDirectory) override {
         std::string version = HashIsFileContent(sourceFilePath) + sourceFilePath.extension().string();
-        return sourceFilePath.parent_path() / sourceFilePath.stem() / version;
+        return version;
     }
 };
 
@@ -65,19 +49,31 @@ public:
     }
 };
 
-class logVManager : public VersionManager {
-private:
-    tLogger logger;
-public:
-    void CreateVersion(const std::filesystem::path& s) override {
-        VersionManager::CreateVersion(s);
-        Transaction transaction(Operation::created, s);
-        logger.Add("index" + s.extension().string());
-        logger.Add("index" + s.extension().string());
-    }
-};
 
 TEST_F(VersionTests, CreateVesionInManager) {
+    MockVersionCreator vCreator;
+
+    vCreator.DelegateToFake();
+
+    VersionManager vManager(&vCreator);
+    vManager.SetVersionsPath(source.parent_path());
+
+    std::string testContent = "TESTFILE";
+    fileWrite(source, testContent);
+
+    using ::testing::_;
+    using ::testing::Return;
+    EXPECT_CALL(vCreator, AddToIndex(_, _)).Times(1)
+    .WillOnce(Return("index" + source.extension().string()));
+    EXPECT_CALL(vCreator, CreateVersion(_, _)).Times(1)
+    .WillOnce(Return(testContent + source.extension().string()));
+
+    vManager.CreateVersion(source);
+}
+
+
+// -----
+TEST_F(VersionTests, DeleteVesionInManager) {
     MockVersionCreator vCreator;
 
     vCreator.DelegateToFake();
@@ -94,32 +90,8 @@ TEST_F(VersionTests, CreateVesionInManager) {
 
     vManager.CreateVersion(source);
 
-    EXPECT_EQ("index" + source.extension().string(), );
-    tLogger.DeleteLastTransaction();
-    EXPECT_EQ(testContent + source.extension().string(), tLogger.GetLastTransaction().filename().string());
-}
-
-TEST_F(VersionTests, DeleteVesionInManager) {
-    File file(source);
-    MockVersionCreator vCreator;
-    TestVersionJournal tLogger;
-
-    vCreator.DelegateToFake();
-
-    VersionManager vManager(&tLogger, &vCreator);
-    vManager.SetVersionsPath(source.parent_path());
-
-    using ::testing::_;
-    EXPECT_CALL(vCreator, AddToIndex(_, _));
-    EXPECT_CALL(vCreator, CreateVersion(_, _));
-
-    std::string testContent = "TESTFILE";
-    fileWrite(source, testContent);
-
-    vManager.CreateVersion(file);
-    tLogger.DeleteLastTransaction();
-
-    fileWrite(tLogger.GetLastTransaction(), "");
+    std::string target = testContent + source.extension().string();
+    fileWrite(source.parent_path() / "versions" / target, "");
 
     int countDeleted = 0;
     countDeleted = vManager.DeleteVersion(testFile, testContent + source.extension().string());
@@ -127,24 +99,21 @@ TEST_F(VersionTests, DeleteVesionInManager) {
 }
 
 TEST_F(VersionTests, GetFileHistory) {
-    File file(source);
-    TestVersionJournal tLogger;
-
-    VersionManager vManager(&tLogger);
+    VersionManager vManager;
     vManager.SetVersionsPath(source.parent_path());
 
     std::string firstSequence = "FIRST";
     std::string secondSequence = "SECOND";
 
     fileWrite(source, firstSequence);
-    vManager.CreateVersion(file);
+    vManager.CreateVersion(source);
 
     // Для разницы во времени создания версии
     using namespace std::literals::chrono_literals;
     std::this_thread::sleep_for(1s);
 
     fileWrite(source, secondSequence);
-    vManager.CreateVersion(file);
+    vManager.CreateVersion(source);
 
     // Полная история файла
     std::vector<std::filesystem::path> history = vManager.GetVersionHistoryForFile(source.stem().string(), "*");
