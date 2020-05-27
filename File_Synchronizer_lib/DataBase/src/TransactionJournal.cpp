@@ -4,6 +4,14 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
+std::string_view TransactionJournal::TimeToReadable(Operation operation) {
+    switch (operation) {
+        case Operation::created: return "created";
+        case Operation::deleted: return "deleted";
+        case Operation::modified: return "modified";
+    }
+}
+
 void TransactionJournal::AddTransaction(Transaction transaction) {
     transactionList.push_back(transaction);
 }
@@ -17,7 +25,7 @@ void TransactionJournal::FixTransaction() {
 
         transactionNode.put("file", transaction.target.string());
         transactionNode.put("time", std::asctime(std::localtime(&readable_time)));
-        transactionNode.put("operation", ConvertToString(transaction.operation));
+        transactionNode.put("operation", TimeToReadable(transaction.operation));
 
         root.add_child("transaction", transactionNode);
     }

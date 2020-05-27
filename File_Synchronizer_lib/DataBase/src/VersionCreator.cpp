@@ -60,3 +60,45 @@ std::filesystem::path VersionCreator::CreateVersion(const std::filesystem::path&
 
     return versionPath;
 }
+
+
+std::filesystem::path VersionCreator::CreateDiff(const std::filesystem::path &file, const std::filesystem::path& versionsDirectory) {
+        // A - исходный файл по sourceFilePath
+        // B - последний индекс по пути <versionsDirectory>/<GetFilename>/index.[exp]
+        std::string indexName = "index" + file.extension().string();
+        std::filesystem::path A = file;
+        std::filesystem::path B = versionsDirectory / file.filename() / indexName;
+
+        std::string version = computeHash(file) + file.extension().string();
+        std::filesystem::path versionPath = versionsDirectory / file.stem() / version ;
+
+        if (!std::filesystem::exists(versionPath.parent_path())) {
+            std::filesystem::create_directories(versionPath.parent_path());
+        }
+
+        std::string buf;
+        std::vector<std::string> ALines;
+        std::vector<std::string> BLines;
+
+        std::ifstream Aifs(A);
+        std::ifstream Bifs(B);
+
+        while (getline(Aifs, buf)) {
+            ALines.push_back(buf);
+        }
+        while (getline(Bifs, buf)) {
+            BLines.push_back(buf);
+        }
+
+        dtl::Diff<std::string> diff(ALines, BLines);
+
+        diff.onHuge();
+        diff.compose();
+
+        diff.composeUnifiedHunks();
+        diff.printUnifiedFormat();
+
+        std::filesystem::copy_file(file, versionPath, std::filesystem::copy_options::update_existing);
+
+        return versionPath;
+}

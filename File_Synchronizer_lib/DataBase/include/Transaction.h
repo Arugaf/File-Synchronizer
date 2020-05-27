@@ -11,14 +11,6 @@ enum class Operation {
     modified
 };
 
-std::string_view ConvertToString(Operation operation) {
-    switch (operation) {
-        case Operation::created: return "created";
-        case Operation::deleted: return "deleted";
-        case Operation::modified: return "modified";
-    }
-}
-
 struct Transaction {
     std::filesystem::path target;
     std::chrono::system_clock::time_point lastOperationTime;

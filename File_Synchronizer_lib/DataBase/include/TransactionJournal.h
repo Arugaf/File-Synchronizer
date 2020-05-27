@@ -23,6 +23,8 @@ class TransactionJournal : public ITransactionJournal<Transaction> {
 private:
     std::filesystem::path journalPath;
     std::vector<Transaction> transactionList;
+
+    std::string_view TimeToReadable(Operation operation);
 public:
     TransactionJournal(const std::filesystem::path& source) {
         journalPath = source / "journal.json";

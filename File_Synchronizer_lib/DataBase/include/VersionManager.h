@@ -4,7 +4,6 @@
 #include "VersionCreator.h"
 #include "iVersionManager.h"
 
-
 class VersionManager : public IVersionManager, public IVersionCreator {
 private:
     std::filesystem::path versionsPath;
@@ -29,6 +28,9 @@ public:
     // Создать хэш-версию и перезаписать index файла по пути file в соответствующей ему папке в versionsPath
     void CreateVersion(const std::filesystem::path& file) override;
 
+    // Создание разницы между двумя файлами с использованием dtl
+    std::filesystem::path CreateDiff(const std::filesystem::path &file) override;
+
     // Удалить версию version(название файла версии) для file
     int DeleteVersion(const std::filesystem::path& file, const std::string& version) override;
 
@@ -38,8 +40,8 @@ public:
     // Вернуть список версий (path to version) для файла по имени filename
     // вернуть все версии (без index) для файла (список отсортирован от самых старых к новым по дате создания)
     // [n] - если запрошенная версия n не существует, то вернет last, иначе i-ю версию по дате
-    std::vector<std::filesystem::path> GetVersionHistoryForFile(const std::string& filename) override;
-    std::vector<std::filesystem::path> GetVersionHistoryForFile(const std::string& filename, const int& number) override;
+    std::vector<std::filesystem::path> GetVersionHistoryForFile(const std::filesystem::path& filename) override;
+    std::vector<std::filesystem::path> GetVersionHistoryForFile(const std::filesystem::path& filename, const int& number) override;
 };
 
 #endif //FILE_SYNCHRONIZER_VERSIONMANAGER_H

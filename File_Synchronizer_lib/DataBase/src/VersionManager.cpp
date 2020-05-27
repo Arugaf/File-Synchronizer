@@ -27,9 +27,9 @@ int VersionManager::DeleteFile(const std::string &filename) {
     return success;
 }
 
-std::vector<std::filesystem::path> VersionManager::GetVersionHistoryForFile(const std::string& filename) {
+std::vector<std::filesystem::path> VersionManager::GetVersionHistoryForFile(const std::filesystem::path& filename) {
     namespace fs = std::filesystem;
-    fs::path source = versionsPath / filename;
+    fs::path source = versionsPath / filename.stem();
     history.clear();
 
     for (auto& item: std::filesystem::directory_iterator(source) ) {
@@ -45,11 +45,22 @@ std::vector<std::filesystem::path> VersionManager::GetVersionHistoryForFile(cons
     return history;
 }
 
-std::vector<std::filesystem::path> VersionManager::GetVersionHistoryForFile(const std::string& filename, const int& number) {
-    std::vector<std::filesystem::path> tmp;
-    GetVersionHistoryForFile(filename);
-    tmp.push_back(history[number]);
-    return tmp;
+std::vector<std::filesystem::path> VersionManager::GetVersionHistoryForFile(const std::filesystem::path& filename, const int& number) {
+    std::vector<std::filesystem::path> tmp = GetVersionHistoryForFile(filename);
+    std::vector<std::filesystem::path> finded;
+
+    if (number >= tmp.size()) {
+        finded.push_back(history.back());
+    } else {
+        finded.push_back(history[number]);
+    }
+
+    return finded;
+}
+
+
+std::filesystem::path VersionManager::CreateDiff(const std::filesystem::path &file) {
+    versionCreator->CreateDiff(file, versionsPath);
 }
 
 

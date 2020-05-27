@@ -6,7 +6,7 @@
 #include "TransactionJournal.h"
 #include "VersionManager.h"
 
-class FileManager : IFileManager {
+class FileManager : public IFileManager {
 private:
     std::unordered_map<std::filesystem::path, std::filesystem::file_time_type, std::hash<std::string>> fileList;
     std::filesystem::path trackfile;
