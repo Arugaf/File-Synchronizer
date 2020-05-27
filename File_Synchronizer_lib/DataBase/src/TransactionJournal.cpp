@@ -1,4 +1,4 @@
-#include "transactionjournal.h"
+#include "TransactionJournal.h"
 
 #include <fstream>
 #include <boost/property_tree/ptree.hpp>
@@ -8,17 +8,7 @@ void TransactionJournal::AddTransaction(Transaction transaction) {
     transactionList.push_back(transaction);
 }
 
-void TransactionJournal::Clear() {
-    transactionList.clear();
-
-    FixJournal();
-}
-
-int TransactionJournal::GetJournalSize() {
-    return transactionList.size();
-}
-
-void TransactionJournal::FixJournal() {
+void TransactionJournal::FixTransaction() {
     boost::property_tree::ptree root;
 
     boost::property_tree::ptree list;
@@ -34,7 +24,9 @@ void TransactionJournal::FixJournal() {
     }
     root.add_child("journal", list);
 
-    boost::property_tree::write_json(journalPath, root);
+    std::ofstream out(journalPath, std::ios::app);
+    boost::property_tree::write_json(out, root);
+    transactionList.clear();
 }
 
 

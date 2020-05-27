@@ -1,14 +1,15 @@
 #ifndef FILE_SYNCHRONIZER_FILE_SYNCHRONIZER_LIB_DATABASE_SRC_FILEMANAGER_H_
 #define FILE_SYNCHRONIZER_FILE_SYNCHRONIZER_LIB_DATABASE_SRC_FILEMANAGER_H_
 
-#include <filesystem>
-#include <unordered_map>
-#include <utility>
+#include "iFileManager.h"
+#include "TransactionJournal.h"
 
-class FileManager {
+class FileManager : IFileManager {
 private:
     std::unordered_map<std::filesystem::path, std::filesystem::file_time_type, std::hash<std::string>> fileList;
     std::filesystem::path trackfile;
+
+    ITransactionJournal* logger;
 
     template <typename TP>
     std::time_t to_time_t(TP tp) {
@@ -19,30 +20,37 @@ private:
     }
 
 public:
-    FileManager(std::filesystem::path source): trackfile(std::move(source)) {};
+    FileManager(const std::filesystem::path& source): logger(new TransactionJournal(source)) {
+        trackfile = source / "syncfilelist.json";
+    };
+    FileManager(const std::filesystem::path& source, ITransactionJournal *_logger) {
+        trackfile = source / "syncfilelist.json";
+        logger = _logger;
+    }
+    ~FileManager() override = default;
 
     // Получить информацию о файле парой (path:time)
-    std::pair<std::filesystem::path, std::filesystem::file_time_type> GetFileInfo(const std::filesystem::path& file);
+    std::pair<std::filesystem::path, std::filesystem::file_time_type> GetFileInfo(const std::filesystem::path& file) override;
 
     // Полный список пар (path:time)
     // в виде unordered_map, где ключ = path файла
     typedef std::unordered_map<std::filesystem::path, std::filesystem::file_time_type, std::hash<std::string>> list;
-    list GetInfo();
+    list GetInfo() override;
 
     // Удалить информацию о файле из списка (из отслеживаемых)
-    void DeleteFile(const std::filesystem::path& file);
+    void DeleteFile(const std::filesystem::path& file) override;
 
     // Вставляет новый файл, если ключ не найден, или обновляет информацию о существующем
-    void SetFileInfo(const std::filesystem::path& file);
+    void SetFileInfo(const std::filesystem::path& file) override;
 
     // Очистить список отслеживаемых файлов
-    void Clear();
+    void Clear() override;
 
     // Заполнить fileList значениями из trackfile (.json-файл)
-    void Load();
+    void Load() override;
 
     // Зафиксировать fileList в trackfile (.json-файл)
-    void Save();
+    void Save() override;
 };
 
 #endif //FILE_SYNCHRONIZER_FILE_SYNCHRONIZER_LIB_DATABASE_SRC_FILEMANAGER_H_

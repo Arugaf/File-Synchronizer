@@ -1,12 +1,11 @@
-/*
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include <fstream>
 #include <chrono>
 #include <thread>
 
-#include "versionmanager.h"
-#include "versioncreator.h"
+#include "VersionManager.h"
+#include "VersionCreator.h"
 #include "fileinit_for_tests.hpp"
 
 std::string HashIsFileContent(const std::filesystem::path& targetSource) {
@@ -21,19 +20,18 @@ std::string HashIsFileContent(const std::filesystem::path& targetSource) {
     return content;
 }
 
-class TestVersionJournal : public ITransactionJournal {
+class tLogger {
 private:
-    std::vector<Transaction> log;
+    std::vector<std::string> messages;
 public:
-    void AddTransaction(Transaction _tr) override {
-        _tr.SetMessage(std::get<std::filesystem::path>(_tr.GetParams()));
-        log.push_back(_tr);
+    void Add(std::string message) {
+        messages.push_back(message);
     };
-    std::filesystem::path GetLastTransaction() {
-        return log.back().GetMessage();
+    std::string Get() {
+        return messages.back();
     }
-    void DeleteLastTransaction () override {
-        log.pop_back();
+    void DeleteLast() {
+        messages.pop_back();
     }
 };
 
@@ -67,14 +65,24 @@ public:
     }
 };
 
+class logVManager : public VersionManager {
+private:
+    tLogger logger;
+public:
+    void CreateVersion(const std::filesystem::path& s) override {
+        VersionManager::CreateVersion(s);
+        Transaction transaction(Operation::created, s);
+        logger.Add("index" + s.extension().string());
+        logger.Add("index" + s.extension().string());
+    }
+};
+
 TEST_F(VersionTests, CreateVesionInManager) {
-    File file(source);
     MockVersionCreator vCreator;
-    TestVersionJournal tLogger;
 
     vCreator.DelegateToFake();
 
-    VersionManager vManager(&tLogger, &vCreator);
+    VersionManager vManager(&vCreator);
     vManager.SetVersionsPath(source.parent_path());
 
     using ::testing::_;
@@ -84,9 +92,9 @@ TEST_F(VersionTests, CreateVesionInManager) {
     std::string testContent = "TESTFILE";
     fileWrite(source, testContent);
 
-    vManager.CreateVersion(file);
+    vManager.CreateVersion(source);
 
-    EXPECT_EQ("index" + source.extension().string(), tLogger.GetLastTransaction().filename().string());
+    EXPECT_EQ("index" + source.extension().string(), );
     tLogger.DeleteLastTransaction();
     EXPECT_EQ(testContent + source.extension().string(), tLogger.GetLastTransaction().filename().string());
 }
@@ -154,4 +162,4 @@ TEST_F(VersionTests, GetFileHistory) {
     fileRead(history[0]);
     EXPECT_EQ(message, secondSequence);
 }
-*/
+

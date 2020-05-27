@@ -1,4 +1,4 @@
-#include "versionmanager.h"
+#include "VersionManager.h"
 
 void VersionManager::SetVersionsPath(const std::filesystem::path& source) {
     versionsPath = source;

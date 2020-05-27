@@ -3,7 +3,7 @@
 #include <fstream>
 #include <iostream>
 
-#include "versioncreator.h"
+#include "VersionCreator.h"
 #include "dtl/dtl.hpp"
 
 std::string VersionCreator::SimpleHashSum(const std::filesystem::path& targetSource) {

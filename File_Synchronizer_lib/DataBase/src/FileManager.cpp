@@ -1,4 +1,4 @@
-#include "filemanager.h"
+#include "FileManager.h"
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -31,12 +31,35 @@ FileManager::list FileManager::GetInfo() {
 }
 
 void FileManager::SetFileInfo(const std::filesystem::path& file) {
+
     auto lastOperationTime = std::filesystem::last_write_time(file);
+
+    if (fileList.contains(file)) {
+        Transaction transaction(Operation::modified, file);
+        logger->AddTransaction(transaction);
+    } else {
+        Transaction transaction(Operation::created, file);
+        logger->AddTransaction(transaction);
+    }
+
     fileList.insert_or_assign(file, lastOperationTime);
+
+    logger->FixTransaction();
+
 }
 
 void FileManager::DeleteFile(const std::filesystem::path& file) {
-    fileList.erase(file);
+    try {
+        fileList.erase(file);
+    } catch (std::exception &e) {
+        throw FileSearchException();
+    }
+
+
+
+    Transaction transaction(Operation::deleted, file);
+    logger->AddTransaction(transaction);
+    logger->FixTransaction();
 }
 
 void FileManager::Clear() {
@@ -60,7 +83,6 @@ void FileManager::Save() {
 
     for (auto &file : fileList) {
         auto readable_time = to_time_t(file.second);
-
         root.put(file.first.string(), std::asctime(std::localtime(&readable_time)));
     }
 
