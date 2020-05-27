@@ -1,4 +1,4 @@
-#include "FileWatcher.hpp"
+#include "FileWatcher.h"
 #include "IMediator.h"
 
 #include "gmock/gmock.h"
@@ -13,11 +13,15 @@ public:
 };
 
 using FileSynchronizer::FileWatcher;
+using FileSynchronizer::FileNames;
+using FileSynchronizer::FileStat;
+
 using testing::Exactly;
+
 namespace fs = std::filesystem;
 
 TEST(FileWatcherBasicFeatures, BadPath) {
-    EXPECT_THROW(FileWatcher("badpath/"), FileSynchronizer::FileWatcherException::InvalidPath);
+    EXPECT_THROW(FileWatcher({"badpath/"}), FileSynchronizer::FileWatcherException::InvalidPath);
 }
 
 TEST(FileWatcherBasicFeatures, CorrectPath) {
@@ -25,7 +29,7 @@ TEST(FileWatcherBasicFeatures, CorrectPath) {
     fs::create_directory(path);
     ASSERT_TRUE(fs::exists(path));
 
-    EXPECT_NO_THROW(FileWatcher fw(path));
+    EXPECT_NO_THROW(FileWatcher fw({path}));
 
     fs::remove(path);
 }
@@ -35,14 +39,14 @@ TEST(FileCreating, Directory) {
     fs::create_directory(path);
     ASSERT_TRUE(fs::exists(path));
 
-    FileWatcher fw(path, 100);
+    FileWatcher fw({path}, 100);
 
     std::string new_dir("test_dir/");
 
-    MockMediator mediator;
-    EXPECT_CALL(mediator, Notify).Times(Exactly(0));
+    auto mediator = std::make_shared<MockMediator>();
+    EXPECT_CALL(*mediator, Notify).Times(Exactly(0));
 
-    fw.StartWatching(&mediator);
+    fw.StartWatching(mediator);
     ASSERT_TRUE(fw.IsWorking() && fw.IsWatching());
 
     fs::create_directory(path + new_dir);
@@ -60,12 +64,12 @@ TEST(FileCreating, File) {
     fs::create_directory(path);
     ASSERT_TRUE(fs::exists(path));
 
-    FileWatcher fw(path, 100);
+    FileWatcher fw({path}, 100);
 
-    MockMediator mediator;
-    EXPECT_CALL(mediator, Notify(FileSynchronizer::EventType::FSChanged)).Times(Exactly(1));
+    auto mediator = std::make_shared<MockMediator>();
+    EXPECT_CALL(*mediator, Notify(FileSynchronizer::EventType::FSChanged)).Times(Exactly(1));
 
-    fw.StartWatching(&mediator);
+    fw.StartWatching(mediator);
     ASSERT_TRUE(fw.IsWorking() && fw.IsWatching());
 
     std::string file("new_file.txt");
@@ -83,12 +87,12 @@ TEST(FileCreating, Ignored) {
     fs::create_directory(path);
     ASSERT_TRUE(fs::exists(path));
 
-    FileWatcher fw(path, std::unordered_set<std::string>({path + "new_file.txt"}), 100);
+    FileWatcher fw({path}, {path + "new_file.txt"}, 100);
 
-    MockMediator mediator;
-    EXPECT_CALL(mediator, Notify(FileSynchronizer::EventType::FSChanged)).Times(Exactly(0));
+    auto mediator = std::make_shared<MockMediator>();
+    EXPECT_CALL(*mediator, Notify(FileSynchronizer::EventType::FSChanged)).Times(Exactly(0));
 
-    fw.StartWatching(&mediator);
+    fw.StartWatching(mediator);
     ASSERT_TRUE(fw.IsWorking() && fw.IsWatching());
 
     std::string file("new_file.txt");
@@ -106,14 +110,14 @@ TEST(ExistingFiles, Deleted) {
     fs::create_directory(path);
     ASSERT_TRUE(fs::exists(path));
 
-    std::unordered_map<std::string, std::pair<fs::file_time_type, fs::file_type>> old_files;
-    old_files[path + "new_file.txt"] = std::make_pair(fs::last_write_time(path), fs::file_type::regular);
-    FileWatcher fw(path, old_files, 100);
+    std::unordered_map<std::string, FileStat> old_files;
+    old_files[path + "new_file.txt"] = {fs::last_write_time(path), fs::file_type::regular};
+    FileWatcher fw({path}, old_files, 100);
 
-    MockMediator mediator;
-    EXPECT_CALL(mediator, Notify(FileSynchronizer::EventType::FSChanged)).Times(Exactly(1));
+    auto mediator = std::make_shared<MockMediator>();
+    EXPECT_CALL(*mediator, Notify(FileSynchronizer::EventType::FSChanged)).Times(Exactly(1));
 
-    fw.StartWatching(&mediator);
+    fw.StartWatching(mediator);
     ASSERT_TRUE(fw.IsWorking() && fw.IsWatching());
 
     std::this_thread::sleep_for(std::chrono::milliseconds(101));
