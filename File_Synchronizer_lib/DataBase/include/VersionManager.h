@@ -2,7 +2,7 @@
 #define FILE_SYNCHRONIZER_VERSIONMANAGER_H
 
 #include "VersionCreator.h"
-#include "iVersionManager.h"
+#include "../../include/IVersionManager.h"
 
 
 class VersionManager : public IVersionManager, public IVersionCreator {
@@ -38,8 +38,8 @@ public:
     // Вернуть список версий (path to version) для файла по имени filename
     // вернуть все версии (без index) для файла (список отсортирован от самых старых к новым по дате создания)
     // [n] - если запрошенная версия n не существует, то вернет last, иначе i-ю версию по дате
-    std::vector<std::filesystem::path> GetVersionHistoryForFile(const std::string& filename) override;
-    std::vector<std::filesystem::path> GetVersionHistoryForFile(const std::string& filename, const int& number) override;
+    std::vector<std::filesystem::path> GetVersionHistoryForFile(const std::filesystem::path& filename) override;
+    std::vector<std::filesystem::path> GetVersionHistoryForFile(const std::filesystem::path& filename, const int& number) override;
 };
 
 #endif //FILE_SYNCHRONIZER_VERSIONMANAGER_H

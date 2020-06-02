@@ -1,7 +1,7 @@
 #ifndef FILE_SYNCHRONIZER_VERSIONMANAGERWRAPPER_H
 #define FILE_SYNCHRONIZER_VERSIONMANAGERWRAPPER_H
 
-#include "IVersionManager.h"
+#include "../../include/IVersionManager.h"
 
 #include <filesystem>
 #include <memory>

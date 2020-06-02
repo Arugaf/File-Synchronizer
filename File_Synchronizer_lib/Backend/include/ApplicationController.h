@@ -14,7 +14,7 @@ namespace FileSynchronizer {
 
     class ApplicationController {
     public:
-        explicit ApplicationController(const fs::path& working_path, DataBaseController& controller, DataBaseWrapper& DB, VersionManagerWrapper& VM);
+        explicit ApplicationController(const fs::path& working_path, const std::shared_ptr<DataBaseController>& controller, DataBaseWrapper& DB, VersionManagerWrapper& VM);
 
         void Start();
         void Stop();
@@ -39,7 +39,7 @@ namespace FileSynchronizer {
         void ClearDB();
 
     private:
-        DataBaseController& controller;
+        std::shared_ptr<DataBaseController> controller;
         DataBaseWrapper& DB;
         VersionManagerWrapper& VM;
         fs::path config_file;

@@ -6,7 +6,7 @@ using FileSynchronizer::ApplicationController;
 namespace fs = std::filesystem;
 
 ApplicationController::ApplicationController(const fs::path& working_path,
-                                             DataBaseController& controller,
+                                             const std::shared_ptr<DataBaseController>& controller,
                                              DataBaseWrapper& DB,
                                              VersionManagerWrapper& VM) : controller(controller),
                                                                           VM(VM),
@@ -16,14 +16,14 @@ ApplicationController::ApplicationController(const fs::path& working_path,
 }
 
 void ApplicationController::Start() {
-    controller.Start();
+    controller->Start();
     listener = std::thread(&ApplicationController::Listen, this);
 }
 
 void FileSynchronizer::ApplicationController::Listen() {
     while (working) {
-        if (controller.CheckEvents()) {
-            controller.HandleEvent();
+        if (controller->CheckEvents()) {
+            controller->HandleEvent();
         }
         std::this_thread::sleep_for(std::chrono::seconds(2));
     }
@@ -34,39 +34,41 @@ void FileSynchronizer::ApplicationController::Stop() {
     if (listener.joinable()) {
         listener.join();
     }
-    controller.Stop();
+    controller->Stop();
 }
 
 void FileSynchronizer::ApplicationController::AddDirectory(const fs::path& dir) {
-    controller.Stop();
-    controller.Start();
+    controller->Stop();
+    controller->Start();
 
     //TODO
 }
 
 void FileSynchronizer::ApplicationController::DeleteDirectory(const fs::path& dir) {
-    controller.Stop();
-    controller.Start();
+    controller->Stop();
+    controller->Start();
 
     //TODO
 }
 
 void FileSynchronizer::ApplicationController::AddIgnoredFile(const fs::path& file) {
-    controller.Stop();
-    controller.Start();
+    controller->Stop();
+    controller->Start();
 
     //TODO
 }
 
 void FileSynchronizer::ApplicationController::DeleteIgnoredFile(const fs::path& file) {
-    controller.Stop();
-    controller.Start();
+    controller->Stop();
+    controller->Start();
 
     //TODO
 }
 
 void FileSynchronizer::ApplicationController::ShowFilesList() {
-    //TODO
+    for (const auto& it : DB.GetAllFiles()) {
+        std::cout << it.first << std::endl;
+    }
 }
 
 void FileSynchronizer::ApplicationController::ShowFileVersions(const fs::path& file) {

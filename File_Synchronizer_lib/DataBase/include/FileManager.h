@@ -1,12 +1,12 @@
 #ifndef FILE_SYNCHRONIZER_FILE_SYNCHRONIZER_LIB_DATABASE_SRC_FILEMANAGER_H_
 #define FILE_SYNCHRONIZER_FILE_SYNCHRONIZER_LIB_DATABASE_SRC_FILEMANAGER_H_
 
-#include "iVersionManager.h"
-#include "iFileManager.h"
+#include "../../include/IVersionManager.h"
+#include "../../include/IFileManager.h"
 #include "TransactionJournal.h"
 #include "VersionManager.h"
 
-class FileManager : IFileManager {
+class FileManager : public IFileManager {
 private:
     std::unordered_map<std::filesystem::path, std::filesystem::file_time_type, std::hash<std::string>> fileList;
     std::filesystem::path trackfile;

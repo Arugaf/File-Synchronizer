@@ -12,7 +12,11 @@ db(db), event_queue(), configure_file_path(std::move(configure_file_path)) {
 }
 
 DataBaseController::~DataBaseController() {
+    if (file_watcher)
     file_watcher->StopWatching();
+    {
+        std::cout << "lol" << std::endl;
+    }
 }
 
 void DataBaseController::Notify(EventType event) {
@@ -27,7 +31,7 @@ void DataBaseController::HandleFileChangedEvent() {
     for (const auto& it : file_watcher->GetChangedFiles()) {
         std::string_view file_name(it.first);
 
-        std::cout << file_name << ' ';
+        //std::cout << file_name << ' ';
         switch (it.second) {
             case FileStatus::Created: {
                 //std::cout << "created" << std::endl;
@@ -109,7 +113,7 @@ void DataBaseController::Start() {
     file_watcher->StartWatching(GetPtr());
 }
 
-std::shared_ptr<DataBaseController> DataBaseController::GetPtr() {
+std::shared_ptr<FileSynchronizer::IMediator> DataBaseController::GetPtr() {
     return shared_from_this();
 }
 

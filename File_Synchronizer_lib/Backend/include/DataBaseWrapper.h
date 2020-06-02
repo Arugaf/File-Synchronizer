@@ -1,7 +1,7 @@
 #ifndef FILE_SYNCHRONIZER_DATABASEWRAPPER_H
 #define FILE_SYNCHRONIZER_DATABASEWRAPPER_H
 
-#include "IFileManager.h"
+#include "../../include/IFileManager.h"
 
 #include <filesystem>
 #include <memory>
@@ -13,9 +13,9 @@ namespace FileSynchronizer {
     class DataBaseWrapper {
     public:
 #ifndef DATABASE
-        DataBaseWrapper();
+        //DataBaseWrapper();
 #endif
-        explicit DataBaseWrapper(std::unique_ptr<IFileManager>);
+        explicit DataBaseWrapper(std::unique_ptr<IFileManager> manager);
 
         void HandleFileCreation(const fs::path& file);
         void HandleFileModification(const fs::path& file);

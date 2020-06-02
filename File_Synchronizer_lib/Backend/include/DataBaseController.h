@@ -24,7 +24,7 @@ namespace FileSynchronizer {
         bool CheckEvents() const;
         EventType HandleEvent();
 
-        std::shared_ptr<DataBaseController> GetPtr();
+        std::shared_ptr<IMediator> GetPtr();
 
     private:
         fs::path configure_file_path;

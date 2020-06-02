@@ -17,7 +17,15 @@ void TransactionJournal::FixTransaction() {
 
         transactionNode.put("file", transaction.target.string());
         transactionNode.put("time", std::asctime(std::localtime(&readable_time)));
-        transactionNode.put("operation", ConvertToString(transaction.operation));
+
+        std::string operation_str;
+        switch (transaction.operation) {
+            case Operation::created: {operation_str = "created"; break;}
+
+            case Operation::deleted: {operation_str = "deleted"; break;}
+            case Operation::modified: {operation_str = "modified"; break;}
+        }
+        transactionNode.put("operation", operation_str);
 
         root.add_child("transaction", transactionNode);
     }

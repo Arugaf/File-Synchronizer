@@ -69,8 +69,8 @@ public:
     ~FileManager() override = default;
 };
 
-FileSynchronizer::DataBaseWrapper::DataBaseWrapper() {
+/*FileSynchronizer::DataBaseWrapper::DataBaseWrapper() {
     manager = std::make_unique<FileManager>();
-}
+}*/
 
 #endif

@@ -10,3 +10,8 @@ set(CMAKE_CXX_STANDARD 20)
 
 add_subdirectory(googletest)
 add_subdirectory(${project_name}_lib)
+
+add_executable(app main.cpp)
+message(File_Synchronizer_backend_lib)
+target_link_libraries(app PUBLIC File_Synchronizer_backend_lib File_Synchronizer_database_lib pthread)
+target_include_directories(app PUBLIC ${backend}_lib_headers_dir)

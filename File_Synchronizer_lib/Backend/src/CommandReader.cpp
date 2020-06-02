@@ -75,7 +75,7 @@ void CommandReader::Listen() {
                 std::stringstream stream(argument.substr(argument.find(' ') + 1));
                 int count = 0;
                 stream >> count;
-                controller.RestoreVersion(argument, count);
+                controller.RestoreVersion(argument.substr(0, argument.find(' ')), count);
             } else {
                 if (!fs::exists(argument)) {
                     continue;
@@ -98,16 +98,17 @@ void CommandReader::Listen() {
 }
 
 void FileSynchronizer::CommandReader::Help() {
+    std::cout << std::endl;
     std::cout << "quit: Close application" << std::endl
               << "files: Show list of tracked files" << std::endl
               << "cleardb: Delete database with files" << std::endl
-              << "log <head/tail> <count=5>: Show first/last count log records" << std::endl
-              << "filelog: Show all records for file" << std::endl
-              << "datelog: Show all records for date" << std::endl
-              << "watch <filename>: Add directory for watching" << std::endl
-              << "delete <filename>: Remove directory" << std::endl
-              << "ignore <filename>: Stop tracking file" << std::endl
-              << "track <filename>: Stop ignoring file" << std::endl
+//              << "log <head/tail> <count=5>: Show first/last count log records" << std::endl
+//              << "filelog: Show all records for file" << std::endl
+//              << "datelog: Show all records for date" << std::endl
+//              << "watch <filename>: Add directory for watching" << std::endl
+//              << "delete <filename>: Remove directory" << std::endl
+//              << "ignore <filename>: Stop tracking file" << std::endl
+//              << "track <filename>: Stop ignoring file" << std::endl
               << "history <filename>: Show all versions of file" << std::endl
               << "restore <filename> <index>: Restore file" << std::endl;
 }
