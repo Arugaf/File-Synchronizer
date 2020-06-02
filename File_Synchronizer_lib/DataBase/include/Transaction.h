@@ -2,6 +2,7 @@
 #define FILE_SYNCHRONIZER_TRANSACTION_H
 
 #include <filesystem>
+#include <tuple>
 #include <utility>
 #include <ctime>
 
@@ -18,8 +19,16 @@ struct Transaction {
 
     Transaction(const Operation& _operation, std::filesystem::path _target):
                 operation(_operation), lastOperationTime(std::chrono::system_clock::now()), target(std::move(_target)) {};
+
+
+    typedef std::filesystem::path path;
+    typedef std::chrono::system_clock::time_point timePoint;
+    [[nodiscard]] virtual std::tuple<path, timePoint, Operation> GetRecord() const;
+
 };
 
-
+std::tuple<Transaction::path, Transaction::timePoint, Operation> Transaction::GetRecord() const {
+    return std::make_tuple(target, lastOperationTime, operation);
+}
 
 #endif //FILE_SYNCHRONIZER_TRANSACTION_H

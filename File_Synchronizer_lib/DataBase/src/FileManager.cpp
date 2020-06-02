@@ -15,8 +15,7 @@ struct FileSearchException : public std::exception {
 template<typename TP>
 std::time_t FileManager::to_time_t(TP tp) {
     using namespace std::chrono;
-    auto sctp = time_point_cast<system_clock::duration>(tp - TP::clock::now()
-                                                            + system_clock::now());
+    auto sctp = time_point_cast<system_clock::duration>(tp - TP::clock::now() + system_clock::now());
     return system_clock::to_time_t(sctp);
 }
 
@@ -77,15 +76,41 @@ void FileManager::Clear() {
 }
 
 void FileManager::Load() {
-    /*boost::property_tree::ptree root;
-
+    boost::property_tree::ptree root;
     boost::property_tree::read_json(trackfile, root);
 
     std::vector<std::pair<std::string, std::string>> list;
 
-    for (boost::property_tree::ptree::value_type &file : root) {
-        //SetFileInfo(std::filesystem::path(file.first), file.second.data());
-    }*/
+    std::string path;
+    std::string ext;
+    std::string filetime;
+
+    for (boost::property_tree::ptree::value_type &record : root) {
+        path = record.first;
+        path += ".";
+
+        for (boost::property_tree::ptree::value_type &file : root.get_child(record.first)) {
+            ext = file.first;
+            filetime = file.second.data();
+
+            list.emplace_back(path + ext, filetime);
+        }
+        //boost::property_tree::write_json(std::cout, root);
+    }
+
+    tm tm{};
+    for (const auto& item : list) {
+        std::istringstream ss(item.second);
+        ss >> std::get_time(&tm, "%c");
+        std::time_t timeT = std::mktime(&tm);
+
+        auto tp = std::chrono::system_clock::from_time_t(timeT);
+        // TODO: convert to file clock?
+        //auto ftp =  std::filesystem::<std::filesystem::file_time_type::clock::duration>(std::chrono::system_clock::from_time_t(timeT));
+        //fileList.insert_or_assign(std::filesystem::path(item.first), tp);
+
+        std::cout << item.first << ":" << item.second << std::endl;
+    }
 }
 
 void FileManager::Save() {

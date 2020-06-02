@@ -14,7 +14,7 @@ private:
     ITransactionJournal<Transaction>* logger;
     VersionManager* versionManager;
 
-    // Перевод времени из file_time_type в читаемое человеком представление
+    // Перевод времени из file_time_type в читаемое представление
     template <typename TP>
     std::time_t to_time_t(TP tp);
 

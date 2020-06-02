@@ -20,7 +20,7 @@ find_package(Boost)
 include_directories(${Boost_INCLUDE_DIRS})
 
 # Library
-add_library(${project_name}_${database}_lib STATIC ${${database}_lib_sources} ../include/iFileManager.h ../include/iVersionManager.h)
+add_library(${project_name}_${database}_lib STATIC ${${database}_lib_sources} ../include/iFileManager.h ../include/iVersionManager.h src/Writer.cpp include/JournalWriter/Writer.h include/JournalWriter/WriterImpl.h src/WriterJSON.cpp include/JournalWriter/WriterJSON.h ../include/IVersionCreator.h)
 target_include_directories(${project_name}_${database}_lib PUBLIC ${${database}_lib_headers_dir})
 target_link_libraries(${project_name}_${database}_lib ${Boost_LIBRARIES})
 

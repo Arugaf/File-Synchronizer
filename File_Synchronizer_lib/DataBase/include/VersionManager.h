@@ -3,8 +3,9 @@
 
 #include "VersionCreator.h"
 #include "iVersionManager.h"
+#include "IVersionCreator.h"
 
-class VersionManager : public IVersionManager, public IVersionCreator {
+class VersionManager : public IVersionManager, public IVersionCreator  {
 private:
     std::filesystem::path versionsPath;
     std::vector<std::filesystem::path> history;
@@ -22,6 +23,7 @@ public:
 
     void SetVersionsPath(const std::filesystem::path& source);
 
+    // ------------------------------- CREATE VERSION SECTION --------------------------------------
     // Проиндексировать указанный файл
     void CreateIndex(const std::filesystem::path& file) override;
 
@@ -30,18 +32,30 @@ public:
 
     // Создание разницы между двумя файлами с использованием dtl
     std::filesystem::path CreateDiff(const std::filesystem::path &file) override;
+    // ---------------------------------------------------------------------------------------------
 
+    // ----------------------------------- MANAGE SECTION ------------------------------------------
     // Удалить версию version(название файла версии) для file
-    int DeleteVersion(const std::filesystem::path& file, const std::string& version) override;
+    int DeleteVersion(const std::filesystem::path& file, const std::filesystem::path& version) override;
 
-    // Удалить папку с версиями для файла filename
-    int DeleteFile(const std::string& filename) override;
+    // Скрыть папку с версиями для файла file -> возможность восстановить версии
+    void DeleteFile(const std::filesystem::path &file) override;
+
+    // Восстановить папку с версиями для файла file
+    void RestoreFile(const std::filesystem::path &file) override;
+
+    // Удалить папку с версиями для файла file окончательно
+    int DeleteFileInstantly(const std::filesystem::path &file) override;
+
+    // Восстановить содержимое файла согласно версии №[number]
+    void RestoreFileFromVersion(const std::filesystem::path &filename, const int &number) override;
 
     // Вернуть список версий (path to version) для файла по имени filename
     // вернуть все версии (без index) для файла (список отсортирован от самых старых к новым по дате создания)
     // [n] - если запрошенная версия n не существует, то вернет last, иначе i-ю версию по дате
     std::vector<std::filesystem::path> GetVersionHistoryForFile(const std::filesystem::path& filename) override;
     std::vector<std::filesystem::path> GetVersionHistoryForFile(const std::filesystem::path& filename, const int& number) override;
+    // ---------------------------------------------------------------------------------------------
 };
 
 #endif //FILE_SYNCHRONIZER_VERSIONMANAGER_H

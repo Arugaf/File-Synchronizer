@@ -1,15 +1,13 @@
 #include "TransactionJournal.h"
 
-#include <fstream>
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
+TransactionJournal::TransactionJournal(const std::filesystem::path &source) {
+    writer = new Writer();
+    writer->InitFileForWriting(source);
+}
 
-std::string_view TransactionJournal::TimeToReadable(Operation operation) {
-    switch (operation) {
-        case Operation::created: return "created";
-        case Operation::deleted: return "deleted";
-        case Operation::modified: return "modified";
-    }
+TransactionJournal::~TransactionJournal() {
+    delete writer;
+    writer = nullptr;
 }
 
 void TransactionJournal::AddTransaction(Transaction transaction) {
@@ -17,24 +15,24 @@ void TransactionJournal::AddTransaction(Transaction transaction) {
 }
 
 void TransactionJournal::FixTransaction() {
-    boost::property_tree::ptree root;
-
     for (auto &transaction : transactionList) {
-        boost::property_tree::ptree transactionNode;
-        auto readable_time = std::chrono::system_clock::to_time_t(transaction.lastOperationTime);
-
-        transactionNode.put("file", transaction.target.string());
-        transactionNode.put("time", std::asctime(std::localtime(&readable_time)));
-        transactionNode.put("operation", TimeToReadable(transaction.operation));
-
-        root.add_child("transaction", transactionNode);
+        writer->Write(transaction);
     }
+    Clear();
+}
 
-    std::ofstream out(journalPath, std::ios::app);
-    boost::property_tree::write_json(out, root);
-    out.close();
+void TransactionJournal::DeleteLastTransaction()  {
+    transactionList.pop_back();
+}
+
+Transaction TransactionJournal::GetLastTransaction() {
+    return transactionList.back();
+}
+
+void TransactionJournal::Clear() {
     transactionList.clear();
 }
 
-
-
+int TransactionJournal::GetSize() {
+    return transactionList.size();
+}
