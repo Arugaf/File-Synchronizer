@@ -1,10 +1,15 @@
 #ifndef FILE_SYNCHRONIZER_FILE_SYNCHRONIZER_LIB_DATABASE_SRC_FILEMANAGER_H_
 #define FILE_SYNCHRONIZER_FILE_SYNCHRONIZER_LIB_DATABASE_SRC_FILEMANAGER_H_
 
+#include <chrono>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+
 #include "IVersionManager.h"
 #include "IFileManager.h"
 #include "TransactionJournal.h"
 #include "VersionManager.h"
+#include "FileException.h"
 
 class FileManager : public IFileManager {
 private:
@@ -21,6 +26,8 @@ private:
     template <typename TP>
     std::time_t to_time_t(TP tp);
 
+    void LoadTracked();
+    void LoadDeleted();
 public:
     FileManager(const std::filesystem::path& source): logger(new TransactionJournal(source)), versionManager(new VersionManager(source)) {
         trackfile = source / "syncfilelist.json";
@@ -52,6 +59,8 @@ public:
 
     // Очистить список отслеживаемых файлов
     void Clear() override;
+
+    int ClearAll() override;
 
     // Заполнить fileList значениями из trackfile (.json-файл)
     void Load() override;

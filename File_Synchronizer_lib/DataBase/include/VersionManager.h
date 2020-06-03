@@ -4,6 +4,7 @@
 #include "VersionCreator.h"
 #include "IVersionManager.h"
 #include "IVersionCreator.h"
+#include "FileException.h"
 
 class VersionManager : public IVersionManager, public IVersionCreator  {
 private:

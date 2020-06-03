@@ -4,6 +4,7 @@
 #include <filesystem>
 #include <unordered_map>
 #include <utility>
+#include <vector>
 
 class IFileManager {
 public:
@@ -21,6 +22,7 @@ public:
     virtual void RestoreFile(const int &number) = 0;
     virtual void SetFileInfo(const std::filesystem::path &file) = 0;
     virtual void Clear() = 0;
+    virtual int ClearAll() = 0;
     virtual void Load() = 0;
     virtual void Save() = 0;
 };

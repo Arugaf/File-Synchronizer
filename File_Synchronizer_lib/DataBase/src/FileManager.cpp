@@ -1,17 +1,5 @@
 #include "FileManager.h"
 
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
-
-#include <chrono>
-
-
-struct FileSearchException : public std::exception {
-    [[nodiscard]] const char * what () const noexcept override {
-        return "File doesn't exists";
-    }
-};
-
 template<typename TP>
 std::time_t FileManager::to_time_t(TP tp) {
     using namespace std::chrono;
@@ -69,6 +57,18 @@ void FileManager::DeleteFile(const std::filesystem::path& file) {
     logger->FixTransaction();
 }
 
+
+std::vector<std::filesystem::path> FileManager::GetDeletedFiles() {
+    return deletedFiles;
+}
+
+void FileManager::RestoreFile(const int &number) {
+    if (number < deletedFiles.size()) {
+        fileList.insert_or_assign(deletedFiles[number], std::filesystem::last_write_time(deletedFiles[number]));
+        deletedFiles.erase(deletedFiles.begin() + number);
+    }
+}
+
 void FileManager::RestoreFile(const std::filesystem::path &file) {
     if (std::find(deletedFiles.begin(), deletedFiles.end(), file) != deletedFiles.end()) {
         deletedFiles.erase(std::remove(deletedFiles.begin(), deletedFiles.end(), file), deletedFiles.end());
@@ -93,47 +93,30 @@ void FileManager::DeleteFileInstantly(const std::filesystem::path &file) {
 
 void FileManager::Clear() {
     fileList.clear();
+    deletedFiles.clear();
+
+    Save();
+}
+
+int FileManager::ClearAll() {
+    Clear();
+
+    int successTrack = std::filesystem::remove_all(trackfile);
+    int successDeleted = std::filesystem::remove_all(deletedfile);
+
+    return successTrack + successDeleted;
 }
 
 void FileManager::Load() {
-    if (std::filesystem::exists(trackfile)) {
-        boost::property_tree::ptree root;
-        boost::property_tree::read_json(trackfile, root);
-
-        std::vector<std::pair<std::string, std::string>> list;
-
-        std::string path;
-        std::string ext;
-        std::string filetime;
-
-        for (boost::property_tree::ptree::value_type &record : root) {
-            path = record.first;
-            path += ".";
-
-            for (boost::property_tree::ptree::value_type &file : root.get_child(record.first)) {
-                ext = file.first;
-                filetime = file.second.data();
-
-                list.emplace_back(path + ext, filetime);
-            }
-            //boost::property_tree::write_json(std::cout, root);
-        }
-
-        tm tm{};
-        for (const auto& item : list) {
-            std::istringstream ss(item.second);
-            ss >> std::get_time(&tm, "%c");
-            std::time_t timeT = std::mktime(&tm);
-
-            auto tp = std::chrono::system_clock::from_time_t(timeT);
-            // TODO: convert to file clock?
-            // TODO: possible in C++20, but "clock_cast" not founded
-            //auto ftp =  clock_cast<chrono::file_clock>(chrono::system_clock::from_time_t(timeT));
-
-            fileList.insert_or_assign(std::filesystem::path(item.first), std::filesystem::last_write_time(item.first));
-
-            //std::cout << item.first << ":" << item.second << std::endl;
-        }
+    if (!std::filesystem::exists(trackfile)) {
+        return;
+    } else {
+        LoadTracked();
+    }
+    if (!std::filesystem::exists(deletedfile)) {
+        return;
+    } else {
+        LoadDeleted();
     }
 }
 
@@ -144,22 +127,60 @@ void FileManager::Save() {
         auto readable_time = to_time_t(file.second);
         root.put(file.first.string(), std::asctime(std::localtime(&readable_time)));
     }
-
     boost::property_tree::write_json(trackfile, root);
 
-    /*for (auto &file : deletedFiles) {
-        std::fstream deleted("deleted.json")
-    }*/
+    root.clear();
+    for (int i = 0; i < deletedFiles.size(); i++) {
+        root.put(std::to_string(i), deletedFiles[i]);
+    }
+    boost::property_tree::write_json(deletedfile, root);
 }
 
-std::vector<std::filesystem::path> FileManager::GetDeletedFiles() {
-    return deletedFiles;
-}
+void FileManager::LoadTracked() {
+    boost::property_tree::ptree root;
+    boost::property_tree::read_json(trackfile, root);
 
-void FileManager::RestoreFile(const int &number) {
-    if (number < deletedFiles.size()) {
-        fileList.insert_or_assign(deletedFiles[number], std::filesystem::last_write_time(deletedFiles[number]));
-        deletedFiles.erase(deletedFiles.begin() + number);
+    std::vector<std::pair<std::string, std::string>> list;
+
+    std::string path;
+    std::string ext;
+    std::string filetime;
+
+    for (boost::property_tree::ptree::value_type &record : root) {
+        path = record.first;
+        path += ".";
+
+        for (boost::property_tree::ptree::value_type &file : root.get_child(record.first)) {
+            ext = file.first;
+            filetime = file.second.data();
+
+            list.emplace_back(path + ext, filetime);
+        }
+        //boost::property_tree::write_json(std::cout, root);
+    }
+
+    tm tm{};
+    for (const auto& item : list) {
+        std::istringstream ss(item.second);
+        ss >> std::get_time(&tm, "%c");
+        std::time_t timeT = std::mktime(&tm);
+
+        auto tp = std::chrono::system_clock::from_time_t(timeT);
+        // TODO: convert to file clock?
+        // TODO: possible in C++20, but "clock_cast" not founded
+        //auto ftp =  clock_cast<chrono::file_clock>(chrono::system_clock::from_time_t(timeT));
+
+        fileList.insert_or_assign(std::filesystem::path(item.first), std::filesystem::last_write_time(item.first));
+
+        //std::cout << item.first << ":" << item.second << std::endl;
+    }
+}
+void FileManager::LoadDeleted() {
+    boost::property_tree::ptree root;
+    boost::property_tree::read_json(deletedfile, root);
+
+    for (boost::property_tree::ptree::value_type &record : root) {
+        deletedFiles.emplace_back(record.second.data());
     }
 }
 
