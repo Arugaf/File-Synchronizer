@@ -10,16 +10,18 @@ std::string VersionCreator::SimpleHashSum(const std::filesystem::path& targetSou
     std::string element;
     size_t hash = 1;
 
-    std::ifstream targetFile(targetSource);
-    if (targetFile.is_open()) {
-        for (int i = 0; !targetFile.eof(); i++) {
-            std::getline(targetFile, element);
+    if (std::filesystem::file_size(targetSource) <= 2147483648) {   // 2 GB
+        std::ifstream targetFile(targetSource);
+        if (targetFile.is_open()) {
+            for (int i = 0; !targetFile.eof(); i++) {
+                std::getline(targetFile, element);
 
-            size_t currentHash = std::hash<std::string>()(element);
-            hash = hash ^ (currentHash << i);
+                size_t currentHash = std::hash<std::string>()(element);
+                hash = hash ^ (currentHash << i);
+            }
         }
+        targetFile.close();
     }
-    targetFile.close();
 
     if (hash == 1) {
         hash = std::hash<std::string>()(targetSource.string());
@@ -33,7 +35,7 @@ std::filesystem::path VersionCreator::AddToIndex(const std::filesystem::path& so
     try {
         std::string indexName = "index" + sourceFilePath.extension().string();
 
-        std::filesystem::path index = versionsDirectory / sourceFilePath.stem() / indexName;
+        std::filesystem::path index = versionsDirectory / sourceFilePath.filename() / indexName;
 
         if (!std::filesystem::exists(index.parent_path())) {
             std::filesystem::create_directories(index.parent_path());
@@ -54,7 +56,7 @@ std::filesystem::path VersionCreator::CreateVersion(const std::filesystem::path&
     // работает не только для .txt
 
     std::string version = computeHash(sourceFilePath) + sourceFilePath.extension().string();
-    std::filesystem::path versionPath = versionsDirectory / sourceFilePath.stem() / version ;
+    std::filesystem::path versionPath = versionsDirectory / sourceFilePath.filename() / version ;
 
     if (!std::filesystem::exists(versionPath.parent_path())) {
         std::filesystem::create_directories(versionPath.parent_path());
@@ -74,7 +76,7 @@ std::filesystem::path VersionCreator::CreateDiff(const std::filesystem::path &fi
         std::filesystem::path B = versionsDirectory / file.filename() / indexName;
 
         std::string version = computeHash(file) + file.extension().string();
-        std::filesystem::path versionPath = versionsDirectory / file.stem() / version ;
+        std::filesystem::path versionPath = versionsDirectory / file.filename() / version ;
 
         if (!std::filesystem::exists(versionPath.parent_path())) {
             std::filesystem::create_directories(versionPath.parent_path());

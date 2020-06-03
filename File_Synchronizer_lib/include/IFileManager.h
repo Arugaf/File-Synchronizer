@@ -15,6 +15,8 @@ public:
     virtual list GetInfo() = 0;
 
     virtual void DeleteFile(const std::filesystem::path& file) = 0;
+    virtual void DeleteFileInstantly(const std::filesystem::path &file) = 0;
+    virtual void RestoreFile(const std::filesystem::path& file) = 0;
     virtual void SetFileInfo(const std::filesystem::path& file) = 0;
     virtual void Clear() = 0;
     virtual void Load() = 0;

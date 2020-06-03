@@ -29,43 +29,17 @@ void VersionManager::CreateDiff(const std::filesystem::path &file) {
 }
 
 int VersionManager::DeleteVersion(const std::filesystem::path& file, const std::filesystem::path& version) {
-    std::filesystem::path pathToVersionForDelete = versionsPath / file.stem() / version;
+    std::filesystem::path pathToVersionForDelete = versionsPath / file.filename() / version;
 
     int success = std::filesystem::remove_all(pathToVersionForDelete);
     return success;
 }
 
-void VersionManager::DeleteFile(const std::filesystem::path &file) {
-    std::filesystem::path pathForDelete = versionsPath / file.stem();
-
-    std::filesystem::permissions(pathForDelete, std::filesystem::perms::owner_read | std::filesystem::perms::group_read
-    | std::filesystem::perms::others_read, std::filesystem::perm_options::replace);
-}
-
-void VersionManager::RestoreFile(const std::filesystem::path &file) {
-    std::filesystem::path pathForDelete = versionsPath / file.stem();
-
-    std::filesystem::permissions(pathForDelete, std::filesystem::perms::owner_all | std::filesystem::perms::group_all
-    | std::filesystem::perms::others_read | std::filesystem::perms::others_write, std::filesystem::perm_options::replace);
-}
+[[maybe_unused]] void VersionManager::DeleteFile(const std::filesystem::path &file) {}
+[[maybe_unused]] void VersionManager::RestoreFile(const std::filesystem::path &file) {}
 
 int VersionManager::DeleteFileInstantly(const std::filesystem::path &file) {
-    std::filesystem::path pathForDelete = versionsPath / file.stem();
-
-    std::function checkPerms = [&](std::filesystem::perms p) {
-        bool isClose = false;
-
-        if ((p & std::filesystem::perms::owner_all) == std::filesystem::perms::owner_read ||
-            (p & std::filesystem::perms::group_all) == std::filesystem::perms::group_read) {
-            isClose = true;
-        }
-
-        return isClose;
-    };
-
-    if ( checkPerms(std::filesystem::status(pathForDelete).permissions()) ) {
-        RestoreFile(file);
-    }
+    std::filesystem::path pathForDelete = versionsPath / file.filename();
 
     int success = std::filesystem::remove_all(pathForDelete);
     return success;
@@ -80,7 +54,7 @@ void VersionManager::RestoreFileFromVersion(const std::filesystem::path &filenam
 
 std::vector<std::filesystem::path> VersionManager::GetVersionHistoryForFile(const std::filesystem::path& filename) {
     namespace fs = std::filesystem;
-    fs::path source = versionsPath / filename.stem();
+    fs::path source = versionsPath / filename.filename();
     history.clear();
 
     for (auto& item: std::filesystem::directory_iterator(source) ) {
