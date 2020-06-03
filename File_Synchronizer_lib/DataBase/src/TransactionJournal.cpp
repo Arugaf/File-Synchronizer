@@ -75,3 +75,7 @@ void TransactionJournal::Clear() {
 int TransactionJournal::GetSize() {
     return transactionList.size();
 }
+
+void TransactionJournal::SetTimeFormat(const std::string &_format) {
+    writer->SetTimeFormat(_format);
+}

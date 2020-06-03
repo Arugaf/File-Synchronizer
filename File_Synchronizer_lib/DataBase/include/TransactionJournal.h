@@ -23,6 +23,7 @@ class ITransactionJournal {
 public:
     virtual void AddTransaction(TransactionRecord) = 0;
     virtual void SetLogOperationsLevel(LogOperationsLevel level) = 0;
+    virtual void SetTimeFormat(const std::string &_format) = 0;
     // Для фиксирования транзакций в файлах
     virtual void FixTransaction(){};
 
@@ -46,6 +47,7 @@ public:
     void FixTransaction() override;
     void Clear() override;
     void SetLogOperationsLevel(LogOperationsLevel level) override;
+    void SetTimeFormat(const std::string &_format) override;
 
     [[maybe_unused]] Transaction GetLastTransaction() override;
     [[maybe_unused]] void DeleteLastTransaction() override;
@@ -67,6 +69,10 @@ public:
 
     void SetLogOperationsLevel(LogOperationsLevel level) override {
         currentLevel = level;
+    }
+
+    void SetTimeFormat(const std::string &_format) override {
+
     }
 
     std::string GetLastTransaction() override {
