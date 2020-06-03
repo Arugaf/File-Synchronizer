@@ -9,6 +9,7 @@
 class FileManager : public IFileManager {
 private:
     std::unordered_map<std::filesystem::path, std::filesystem::file_time_type, std::hash<std::string>> fileList;
+    std::vector<std::filesystem::path> deletedFiles;
     std::filesystem::path trackfile;
 
     ITransactionJournal<Transaction>* logger;
@@ -35,6 +36,10 @@ public:
 
     // Удалить информацию о файле из списка (из отслеживаемых)
     void DeleteFile(const std::filesystem::path& file) override;
+
+    void RestoreFile(const std::filesystem::path& file) override;
+
+    void DeleteFileInstantly(const std::filesystem::path &file) override;
 
     // Вставляет новый файл, если ключ не найден, или обновляет информацию о существующем
     void SetFileInfo(const std::filesystem::path& file) override;

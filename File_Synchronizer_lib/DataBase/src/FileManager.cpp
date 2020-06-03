@@ -38,30 +38,53 @@ FileManager::list FileManager::GetInfo() {
 }
 
 void FileManager::SetFileInfo(const std::filesystem::path& file) {
-    auto lastOperationTime = std::filesystem::last_write_time(file);
+    if (std::filesystem::exists(file)) {
+        if (fileList.contains(file)) {
+            Transaction transaction(Operation::modified, file);
+            logger->AddTransaction(transaction);
+        } else {
+            RestoreFile(file);
+            Transaction transaction(Operation::created, file);
+            logger->AddTransaction(transaction);
+        }
+        versionManager->CreateVersion(file);
 
-    if (fileList.contains(file)) {
-        Transaction transaction(Operation::modified, file);
-        logger->AddTransaction(transaction);
-    } else {
-        Transaction transaction(Operation::created, file);
-        logger->AddTransaction(transaction);
+        auto lastOperationTime = std::filesystem::last_write_time(file);
+        fileList.insert_or_assign(file, lastOperationTime);
+
+        logger->FixTransaction();
     }
-    versionManager->CreateVersion(file);
-
-    fileList.insert_or_assign(file, lastOperationTime);
-
-    logger->FixTransaction();
-
 }
 
 void FileManager::DeleteFile(const std::filesystem::path& file) {
     try {
         fileList.erase(file);
-        versionManager->DeleteFile(file);
+        deletedFiles.push_back(file);
     } catch (std::exception &e) {
         throw FileSearchException();
     }
+
+    Transaction transaction(Operation::deleted, file);
+    logger->AddTransaction(transaction);
+    logger->FixTransaction();
+}
+
+void FileManager::RestoreFile(const std::filesystem::path &file) {
+    if (std::find(deletedFiles.begin(), deletedFiles.end(), file) != deletedFiles.end()) {
+        deletedFiles.erase(std::remove(deletedFiles.begin(), deletedFiles.end(), file), deletedFiles.end());
+        fileList.insert_or_assign(file, std::filesystem::last_write_time(file));
+    }
+}
+
+void FileManager::DeleteFileInstantly(const std::filesystem::path &file) {
+    if (fileList.contains(file)) {
+        fileList.erase(file);
+    }
+    if (std::find(deletedFiles.begin(), deletedFiles.end(), file) != deletedFiles.end()) {
+        deletedFiles.erase(std::remove(deletedFiles.begin(), deletedFiles.end(), file), deletedFiles.end());
+    }
+
+    versionManager->DeleteFileInstantly(file);
 
     Transaction transaction(Operation::deleted, file);
     logger->AddTransaction(transaction);
@@ -121,4 +144,6 @@ void FileManager::Save() {
 
     boost::property_tree::write_json(trackfile, root);
 }
+
+
 
