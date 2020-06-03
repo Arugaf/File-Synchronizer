@@ -11,7 +11,10 @@ set(${database}_lib_sources_dir ${database_path}/src)
 set(${database}_lib_sources ${${database}_lib_sources_dir}/TransactionJournal.cpp
                             ${${database}_lib_sources_dir}/VersionCreator.cpp
                             ${${database}_lib_sources_dir}/VersionManager.cpp
-                            ${${database}_lib_sources_dir}/FileManager.cpp)
+                            ${${database}_lib_sources_dir}/FileManager.cpp
+                            ${${database}_lib_sources_dir}/Writer.cpp
+                            ${${database}_lib_sources_dir}/WriterJSON.cpp
+        )
 
 
 # BOOSTj

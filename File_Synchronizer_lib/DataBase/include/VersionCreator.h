@@ -4,7 +4,7 @@
 #include <filesystem>
 #include <functional>
 
-//#include "dtl/dtl.hpp"
+#include "dtl/dtl.hpp"
 
 class VersionCreator {
 private:
@@ -28,6 +28,7 @@ public:
 
     virtual std::filesystem::path AddToIndex(const std::filesystem::path& sourceFilePath, const std::filesystem::path& versionsDirectory);
     virtual std::filesystem::path CreateVersion(const std::filesystem::path& sourceFilePath, const std::filesystem::path& versionsDirectory);
+    virtual std::filesystem::path CreateDiff(const std::filesystem::path &file, const std::filesystem::path& versionsDirectory);
 };
 
 #endif //FILE_SYNCHRONIZER_VERSIONCREATOR_H

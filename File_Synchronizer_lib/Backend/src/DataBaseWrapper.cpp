@@ -23,7 +23,7 @@ void DataBaseWrapper::ClearDB() {
 }
 
 void DataBaseWrapper::LoadDBFromFile() {
-    manager->Load();
+    // manager->Load();
 }
 
 void DataBaseWrapper::SaveDbToFile() {
