@@ -18,7 +18,7 @@ public:
     void InitFileForWriting(const std::filesystem::path &source);
 
     // Изменить формат времени
-    // по умолчанию: день.месяц.год часы(24ч):минуты:секунды = %d.%B.%Y %T
+    // по умолчанию: день.месяц.год часы(24ч):минуты:секунды = %d %B %Y %T
     void SetTimeFormat(const std::string &_format);
 
     void Write(const Transaction &transaction);

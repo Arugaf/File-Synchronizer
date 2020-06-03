@@ -2,7 +2,7 @@
 #define FILE_SYNCHRONIZER_VERSIONMANAGER_H
 
 #include "VersionCreator.h"
-#include "iVersionManager.h"
+#include "IVersionManager.h"
 #include "IVersionCreator.h"
 
 class VersionManager : public IVersionManager, public IVersionCreator  {
@@ -15,11 +15,8 @@ public:
     VersionManager(const std::filesystem::path& _source): versionCreator(new VersionCreator()) {
         SetVersionsPath(_source);
     }
-    VersionManager(const std::filesystem::path& _source, VersionCreator* _versionCreator) {
-        SetVersionsPath(_source);
-        versionCreator = _versionCreator;
-    };
-    ~VersionManager() = default;
+    VersionManager(const std::filesystem::path& _source, VersionCreator* _versionCreator);
+    ~VersionManager();
 
     void SetVersionsPath(const std::filesystem::path& source);
 
@@ -31,8 +28,8 @@ public:
     void CreateVersion(const std::filesystem::path& file) override;
 
     // Создание разницы между двумя файлами с использованием dtl
-    std::filesystem::path CreateDiff(const std::filesystem::path &file) override;
-    // ---------------------------------------------------------------------------------------------
+    void CreateDiff(const std::filesystem::path &file) override;
+    // -------------------------------------------------------зап--------------------------------------
 
     // ----------------------------------- MANAGE SECTION ------------------------------------------
     // Удалить версию version(название файла версии) для file

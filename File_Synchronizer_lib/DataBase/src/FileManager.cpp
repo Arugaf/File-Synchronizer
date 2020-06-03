@@ -41,16 +41,13 @@ void FileManager::SetFileInfo(const std::filesystem::path& file) {
     auto lastOperationTime = std::filesystem::last_write_time(file);
 
     if (fileList.contains(file)) {
-        versionManager->CreateVersion(file);
-
         Transaction transaction(Operation::modified, file);
         logger->AddTransaction(transaction);
     } else {
-        versionManager->CreateIndex(file);
-
         Transaction transaction(Operation::created, file);
         logger->AddTransaction(transaction);
     }
+    versionManager->CreateVersion(file);
 
     fileList.insert_or_assign(file, lastOperationTime);
 
@@ -61,7 +58,7 @@ void FileManager::SetFileInfo(const std::filesystem::path& file) {
 void FileManager::DeleteFile(const std::filesystem::path& file) {
     try {
         fileList.erase(file);
-        versionManager->DeleteFile(file.stem());
+        versionManager->DeleteFile(file);
     } catch (std::exception &e) {
         throw FileSearchException();
     }
@@ -106,10 +103,11 @@ void FileManager::Load() {
 
         auto tp = std::chrono::system_clock::from_time_t(timeT);
         // TODO: convert to file clock?
-        //auto ftp =  std::filesystem::<std::filesystem::file_time_type::clock::duration>(std::chrono::system_clock::from_time_t(timeT));
+        // TODO: possible in C++20, but "clock_cast" not founded
+        //auto ftp =  clock_cast<chrono::file_clock>(chrono::system_clock::from_time_t(timeT));
         //fileList.insert_or_assign(std::filesystem::path(item.first), tp);
 
-        std::cout << item.first << ":" << item.second << std::endl;
+        //std::cout << item.first << ":" << item.second << std::endl;
     }
 }
 

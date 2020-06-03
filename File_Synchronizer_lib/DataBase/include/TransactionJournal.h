@@ -8,10 +8,21 @@
 #include "Transaction.h"
 #include "JournalWriter/Writer.h"
 
+enum class LogOperationsLevel {
+    CreateOnly,
+    DeleteOnly,
+    ModifyOnly,
+    CreateDelete,
+    CreateModify,
+    DeleteModify,
+    All
+};
+
 template <typename TransactionRecord>
 class ITransactionJournal {
 public:
     virtual void AddTransaction(TransactionRecord) = 0;
+    virtual void SetLogOperationsLevel(LogOperationsLevel level) = 0;
     // Для фиксирования транзакций в файлах
     virtual void FixTransaction(){};
 
@@ -23,6 +34,7 @@ public:
 // ---------------------------------------------------------------------
 class TransactionJournal : public ITransactionJournal<Transaction> {
 private:
+    LogOperationsLevel currentLevel;
     Writer* writer;
     std::vector<Transaction> transactionList;
 public:
@@ -33,6 +45,7 @@ public:
     // Записать текущий журнал транзакций в файл journalPath и очистить
     void FixTransaction() override;
     void Clear() override;
+    void SetLogOperationsLevel(LogOperationsLevel level) override;
 
     [[maybe_unused]] Transaction GetLastTransaction() override;
     [[maybe_unused]] void DeleteLastTransaction() override;
@@ -42,6 +55,7 @@ public:
 class TestJournal : public ITransactionJournal<std::string> {
 private:
     std::vector<std::string> list;
+    LogOperationsLevel currentLevel = LogOperationsLevel::All;
 public:
     ~TestJournal() = default;
 
@@ -49,6 +63,10 @@ public:
 
     void AddTransaction(std::string _tr) override {
         list.push_back(_tr);
+    }
+
+    void SetLogOperationsLevel(LogOperationsLevel level) override {
+        currentLevel = level;
     }
 
     std::string GetLastTransaction() override {

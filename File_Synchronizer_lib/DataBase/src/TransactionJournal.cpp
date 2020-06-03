@@ -3,6 +3,7 @@
 TransactionJournal::TransactionJournal(const std::filesystem::path &source) {
     writer = new Writer();
     writer->InitFileForWriting(source);
+    currentLevel = LogOperationsLevel::All;
 }
 
 TransactionJournal::~TransactionJournal() {
@@ -11,7 +12,41 @@ TransactionJournal::~TransactionJournal() {
 }
 
 void TransactionJournal::AddTransaction(Transaction transaction) {
-    transactionList.push_back(transaction);
+    switch (currentLevel) {
+        case LogOperationsLevel::CreateOnly:
+            if (transaction.operation == Operation::created) {
+                transactionList.push_back(transaction);
+            }
+            break;
+        case LogOperationsLevel::DeleteOnly:
+            if (transaction.operation == Operation::deleted) {
+                transactionList.push_back(transaction);
+            }
+            break;
+        case LogOperationsLevel::ModifyOnly:
+            if (transaction.operation == Operation::modified) {
+                transactionList.push_back(transaction);
+            }
+            break;
+        case LogOperationsLevel::CreateDelete:
+            if (transaction.operation == Operation::created || transaction.operation == Operation::deleted) {
+                transactionList.push_back(transaction);
+            }
+            break;
+        case LogOperationsLevel::CreateModify:
+            if (transaction.operation == Operation::created || transaction.operation == Operation::modified) {
+                transactionList.push_back(transaction);
+            }
+            break;
+        case LogOperationsLevel::DeleteModify:
+            if (transaction.operation == Operation::deleted || transaction.operation == Operation::modified) {
+                transactionList.push_back(transaction);
+            }
+            break;
+        case LogOperationsLevel::All:
+            transactionList.push_back(transaction);
+            break;
+    }
 }
 
 void TransactionJournal::FixTransaction() {
@@ -19,6 +54,10 @@ void TransactionJournal::FixTransaction() {
         writer->Write(transaction);
     }
     Clear();
+}
+
+void TransactionJournal::SetLogOperationsLevel(LogOperationsLevel level) {
+    currentLevel = level;
 }
 
 void TransactionJournal::DeleteLastTransaction()  {

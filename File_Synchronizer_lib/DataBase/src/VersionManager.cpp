@@ -1,7 +1,18 @@
 #include "VersionManager.h"
 
+VersionManager::VersionManager(const std::filesystem::path &_source, VersionCreator *_versionCreator)  {
+    SetVersionsPath(_source);
+    versionCreator = _versionCreator;
+}
+
+VersionManager::~VersionManager() {
+    delete versionCreator;
+    versionCreator = nullptr;
+}
+
 void VersionManager::SetVersionsPath(const std::filesystem::path& source) {
     versionsPath = source / "versions";
+    std::filesystem::create_directory(versionsPath);
 }
 
 void VersionManager::CreateIndex(const std::filesystem::path &file) {
@@ -13,7 +24,7 @@ void VersionManager::CreateVersion(const std::filesystem::path& file) {
     CreateIndex(file);
 }
 
-std::filesystem::path VersionManager::CreateDiff(const std::filesystem::path &file) {
+void VersionManager::CreateDiff(const std::filesystem::path &file) {
     versionCreator->CreateDiff(file, versionsPath);
 }
 

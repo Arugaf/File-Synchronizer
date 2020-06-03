@@ -21,6 +21,10 @@ std::string VersionCreator::SimpleHashSum(const std::filesystem::path& targetSou
     }
     targetFile.close();
 
+    if (hash == 1) {
+        hash = std::hash<std::string>()(targetSource.string());
+    }
+
     return std::to_string(hash);
 }
 

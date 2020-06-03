@@ -1,8 +1,8 @@
 #ifndef FILE_SYNCHRONIZER_FILE_SYNCHRONIZER_LIB_DATABASE_SRC_FILEMANAGER_H_
 #define FILE_SYNCHRONIZER_FILE_SYNCHRONIZER_LIB_DATABASE_SRC_FILEMANAGER_H_
 
-#include "iVersionManager.h"
-#include "iFileManager.h"
+#include "IVersionManager.h"
+#include "IFileManager.h"
 #include "TransactionJournal.h"
 #include "VersionManager.h"
 
