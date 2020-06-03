@@ -25,6 +25,7 @@ int main(int argc, char** argv) {
 
     FileSynchronizer::ApplicationController application(argv[1], db_controller, database_wrapper, vm_wrapper);
     application.Start();
+    // while (true);
     FileSynchronizer::CommandReader commandReader(application);
 
 
