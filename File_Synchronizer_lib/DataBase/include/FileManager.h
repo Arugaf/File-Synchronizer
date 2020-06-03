@@ -10,7 +10,9 @@ class FileManager : public IFileManager {
 private:
     std::unordered_map<std::filesystem::path, std::filesystem::file_time_type, std::hash<std::string>> fileList;
     std::vector<std::filesystem::path> deletedFiles;
+
     std::filesystem::path trackfile;
+    std::filesystem::path deletedfile;
 
     ITransactionJournal<Transaction>* logger;
     VersionManager* versionManager;
@@ -22,6 +24,7 @@ private:
 public:
     FileManager(const std::filesystem::path& source): logger(new TransactionJournal(source)), versionManager(new VersionManager(source)) {
         trackfile = source / "syncfilelist.json";
+        deletedfile = source / "deletedfilelist.json";
     };
 
     ~FileManager() override = default;
@@ -34,10 +37,13 @@ public:
     typedef std::unordered_map<std::filesystem::path, std::filesystem::file_time_type, std::hash<std::string>> list;
     list GetInfo() override;
 
+    std::vector<std::filesystem::path> GetDeletedFiles() override;
+
     // Удалить информацию о файле из списка (из отслеживаемых)
     void DeleteFile(const std::filesystem::path& file) override;
 
     void RestoreFile(const std::filesystem::path& file) override;
+    void RestoreFile(const int &number) override;
 
     void DeleteFileInstantly(const std::filesystem::path &file) override;
 
