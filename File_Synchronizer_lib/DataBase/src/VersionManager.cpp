@@ -47,9 +47,13 @@ int VersionManager::DeleteFileInstantly(const std::filesystem::path &file) {
 
 void VersionManager::RestoreFileFromVersion(const std::filesystem::path &filename, const int &number) {
     std::vector<std::filesystem::path> finded = GetVersionHistoryForFile(filename, number);
-    std::filesystem::copy_file(finded[0], filename, std::filesystem::copy_options::overwrite_existing);
+    if (!finded.empty()) {
+        std::filesystem::copy_file(finded[0], filename, std::filesystem::copy_options::overwrite_existing);
 
-    CreateIndex(filename);
+        CreateIndex(filename);
+    } else {
+        throw false;
+    }
 }
 
 std::vector<std::filesystem::path> VersionManager::GetVersionHistoryForFile(const std::filesystem::path& filename) {
@@ -57,15 +61,17 @@ std::vector<std::filesystem::path> VersionManager::GetVersionHistoryForFile(cons
     fs::path source = versionsPath / filename.filename();
     history.clear();
 
-    for (auto& item: std::filesystem::directory_iterator(source) ) {
-        if (item.path().stem() != "index") {
-            history.push_back(item);
+    if (std::filesystem::exists(source)) {
+        for (auto& item: std::filesystem::directory_iterator(source) ) {
+            if (item.path().stem() != "index") {
+                history.push_back(item);
+            }
         }
-    }
 
-    std::sort(history.begin(), history.end(), [](const fs::path& l, const fs::path& r) {
-        return (fs::last_write_time(l) < fs::last_write_time(r));
-    });
+        std::sort(history.begin(), history.end(), [](const fs::path& l, const fs::path& r) {
+            return (fs::last_write_time(l) < fs::last_write_time(r));
+        });
+    }
 
     return history;
 }
@@ -74,10 +80,12 @@ std::vector<std::filesystem::path> VersionManager::GetVersionHistoryForFile(cons
     std::vector<std::filesystem::path> tmp = GetVersionHistoryForFile(filename);
     std::vector<std::filesystem::path> finded;
 
-    if (number >= tmp.size()) {
-        finded.push_back(history.back());
-    } else {
-        finded.push_back(history[number]);
+    if (!history.empty()) {
+        if (number >= tmp.size()) {
+            finded.push_back(history.back());
+        } else {
+            finded.push_back(history[number]);
+        }
     }
 
     return finded;

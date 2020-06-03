@@ -77,20 +77,21 @@ void CommandReader::Listen() {
                 stream >> count;
                 controller.RestoreVersion(argument.substr(0, argument.find(' ')), count);
             } else {
-                if (!fs::exists(argument)) {
-                    continue;
-                }
-
-                if (operation == "watch") {
-                    controller.AddDirectory(argument);
-                } else if (operation == "delete") {
-                    controller.DeleteDirectory(argument);
-                } else if (operation == "ignore") {
-                    controller.AddIgnoredFile(argument);
-                } else if (operation == "track") {
-                    controller.DeleteIgnoredFile(argument);
-                } else if (operation == "history") {
+                if (operation == "history") {
                     controller.ShowFileVersions(argument);
+                } else {
+                    if (!fs::exists(argument)) {
+                        continue;
+                    }
+                    if (operation == "watch") {
+                        controller.AddDirectory(argument);
+                    } else if (operation == "delete") {
+                        controller.DeleteDirectory(argument);
+                    } else if (operation == "ignore") {
+                        controller.AddIgnoredFile(argument);
+                    } else if (operation == "track") {
+                        controller.DeleteIgnoredFile(argument);
+                    }
                 }
             }
         }

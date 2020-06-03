@@ -52,6 +52,7 @@ public:
 
     // Зафиксировать fileList в trackfile (.json-файл)
     void Save() override;
+    int ClearAll() override;
 };
 
 #endif //FILE_SYNCHRONIZER_FILE_SYNCHRONIZER_LIB_DATABASE_SRC_FILEMANAGER_H_

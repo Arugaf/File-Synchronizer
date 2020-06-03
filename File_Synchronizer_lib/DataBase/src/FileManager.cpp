@@ -96,6 +96,9 @@ void FileManager::Clear() {
 }
 
 void FileManager::Load() {
+    if (!std::filesystem::exists(trackfile)) {
+        return;
+    }
     boost::property_tree::ptree root;
     boost::property_tree::read_json(trackfile, root);
 
@@ -127,6 +130,7 @@ void FileManager::Load() {
         auto tp = std::chrono::system_clock::from_time_t(timeT);
         // TODO: convert to file clock?
         // TODO: possible in C++20, but "clock_cast" not founded
+        fileList.insert_or_assign(std::filesystem::path(item.first), std::filesystem::last_write_time(item.first));
         //auto ftp =  clock_cast<chrono::file_clock>(chrono::system_clock::from_time_t(timeT));
         //fileList.insert_or_assign(std::filesystem::path(item.first), tp);
 
@@ -143,6 +147,15 @@ void FileManager::Save() {
     }
 
     boost::property_tree::write_json(trackfile, root);
+}
+
+int FileManager::ClearAll() {
+    Clear();
+
+    int successTrack = std::filesystem::remove_all(trackfile);
+    //int successDeleted = std::filesystem::remove_all(deletedfile);
+
+    return successTrack/* + successDeleted*/;
 }
 
 

@@ -21,6 +21,7 @@ public:
     virtual void Clear() = 0;
     virtual void Load() = 0;
     virtual void Save() = 0;
+    virtual int ClearAll() = 0;
 };
 
 #endif //FILE_SYNCHRONIZER_FILE_SYNCHRONIZER_LIB_INCLUDE_IFILEMANAGER_H_
