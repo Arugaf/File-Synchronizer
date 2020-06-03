@@ -18,6 +18,7 @@ int main(int ac, char** av) {
             ("path", po::value<std::string>(&arg)->value_name("<path>"), "Set path to working directory")
             ("help,h", "Show possible arguments")
             ("files,l", "Show list of tracked files")
+            /*("removed,L", po::value<std::string>(&arg)->value_name("<filename>"), "Show list of removed files")*/
             ("history,v", po::value<std::string>(&arg)->value_name("<filename>"), "Show list of file versions")
             ("restore,r", po::value<std::vector<std::string>>(&args)->multitoken()->value_name("<filename> <index>"), "Restore previous version of file")
             /*("watch,w", po::value<std::string>(&arg)->value_name("<filename>"), "Add directory to watch")
@@ -133,7 +134,7 @@ int main(int ac, char** av) {
 
     if (vm.count("delete")) {
         VersionManager vem(path);
-        std::cout << "Confirm deleting (you will lose all data) [Y/n]" << std::endl;
+        std::cout << "Confirm deleting (you will permanently lose all version data regarding to this file) [Y/n]" << std::endl;
         std::string ans;
         std::cin >> ans;
         if (ans == "Y" || ans == "y" || ans == "Yes" || ans == "yes") {
